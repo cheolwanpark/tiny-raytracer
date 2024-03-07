@@ -1,3 +1,4 @@
+use crate::Float;
 use image::{RgbImage, Rgb};
 
 #[derive(Clone)]
@@ -9,9 +10,9 @@ pub struct Image {
 
 #[derive(Clone, Copy)]
 pub struct Color {
-    pub r: f64,
-    pub g: f64,
-    pub b: f64,
+    pub r: Float,
+    pub g: Float,
+    pub b: Float,
 }
 
 impl Image {
@@ -53,11 +54,11 @@ impl From<Image> for RgbImage {
 }
 
 impl Color {
-    pub fn new(r: f64, g: f64, b: f64) -> Color {
+    pub fn new(r: Float, g: Float, b: Float) -> Color {
         Color { r, g, b }
     }
 
-    pub fn new_grey(value: f64) -> Color {
+    pub fn new_grey(value: Float) -> Color {
         Color { r: value, g: value, b: value }
     }
 }
@@ -81,8 +82,8 @@ mod test {
         let (width, height) = image.size();
         for j in 0..height {
             for i in 0..width {
-                let r = i as f64 / height as f64;
-                let g = j as f64 / width as f64;
+                let r = i as Float / height as Float;
+                let g = j as Float / width as Float;
                 image.set_pixel(i, j, Color::new(r, g, 0.0));
             }
         }

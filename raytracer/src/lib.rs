@@ -1,1 +1,4 @@
-mod image;
+pub type Float = f32;
+
+pub mod image;
+pub mod math;
