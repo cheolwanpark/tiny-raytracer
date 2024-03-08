@@ -86,6 +86,13 @@ impl Mul<Float> for Vec3 {
     }
 }
 
+impl Mul<Vec3> for Float {
+    type Output = Vec3;
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        Vec3::new(self * rhs.x, self * rhs.y, self * rhs.z)
+    }
+}
+
 impl MulAssign<Float> for Vec3 {
     fn mul_assign(&mut self, rhs: Float) {
         self.x *= rhs;
@@ -184,6 +191,7 @@ mod tests {
         // Addition
         let result = vec1 + vec2;
         assert_eq!(result, Vec3::new(5.0, 7.0, 9.0));
+        assert_eq!(vec1 + vec2, vec2 + vec1);
         let result = vec1 + vec3;
         assert!(result.x.is_infinite() && result.y.is_infinite() && result.z.is_infinite());
         
@@ -196,6 +204,7 @@ mod tests {
         // Multiplication
         let result = vec1 * 2.0;
         assert_eq!(result, Vec3::new(2.0, 4.0, 6.0));
+        assert_eq!(vec1 * 2.0, 2.0 * vec1);
         let result = vec1 * vec4;
         assert_eq!(result, Vec3::new(1.0, 0.0, INFINITY));
         let result = vec1 * INFINITY;
