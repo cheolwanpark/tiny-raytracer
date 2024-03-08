@@ -36,6 +36,10 @@ impl Image {
         (self.width, self.height)
     }
 
+    pub fn aspect_ratio(&self) -> Float {
+        self.width as Float / self.height as Float
+    }
+
     pub fn save(self, filename: &str) {
         let img = RgbImage::from(self);
         img.save(filename).unwrap();
@@ -87,6 +91,6 @@ mod test {
                 image.set_pixel(i, j, Color::new(r, g, 0.0));
             }
         }
-        image.save("image-test.png");
+        image.save("output/image-test.png");
     }
 }

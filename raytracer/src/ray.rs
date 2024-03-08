@@ -7,7 +7,7 @@ pub struct Ray {
 
 impl Ray {
     pub fn new(origin: Vec3, direction: Vec3) -> Ray {
-        Ray { origin, direction }
+        Ray { origin, direction: direction.normalized() }
     }
 
     pub fn origin(&self) -> Vec3 {
@@ -30,10 +30,10 @@ mod tests {
     #[test]
     fn test_at() {
         let origin = Vec3::new(0.0, 0.0, 0.0);
-        let direction = Vec3::new(1.0, 2.0, -1.0);
+        let direction = Vec3::new(1.0, 1.0, -1.0);
         let ray = Ray::new(origin, direction);
         
-        assert_eq!(ray.at(2.5), Vec3::new(2.5, 5.0, -2.5));
+        assert!((ray.at(3_f32.sqrt()) - Vec3::new(1.0, 1.0, -1.0)).length() < 1e-6);
     }
 }
 
