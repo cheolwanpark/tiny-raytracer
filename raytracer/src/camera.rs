@@ -1,12 +1,8 @@
 use crate::{math::vec3::Vec3, ray::Ray, Float};
 
-struct Camera {
-    focal_length: Float,
-    viewport_height: Float,
-    viewport_width: Float,
+pub struct Camera {
     position: Vec3,
     viewport_upper_left: Vec3,
-    forward: Vec3,
     horizontal: Vec3,
     vertical: Vec3,
 }
@@ -31,12 +27,8 @@ impl Camera {
             + (w * focal_length);
 
         Camera {
-            focal_length,
-            viewport_height,
-            viewport_width,
             position,
             viewport_upper_left,
-            forward: w * focal_length,
             horizontal: u * viewport_width,
             vertical: v * viewport_height,
         }
