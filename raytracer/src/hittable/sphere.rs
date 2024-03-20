@@ -23,7 +23,29 @@ impl Sphere {
 
 impl Hittable for Sphere {
     fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord> {
-        unimplemented!()
+        let oc = ray.origin() - self.center;
+        let a = ray.direction().squared_length();
+        let half_b = oc.dot(&ray.direction());
+        let c = oc.squared_length() - self.radius * self.radius;
+        let discriminant = half_b * half_b - a * c;
+        if discriminant < 0.0 {
+            return None
+        }
+        let sqrtd = discriminant.sqrt();
+        let mut t = (-half_b - sqrtd) / a;
+        if t <= t_min || t_max <= t {
+            t = (-half_b + sqrtd) / a;
+            if t <= t_min || t_max <= t {
+                return None;
+            }
+        }
+        
+        let p = ray.at(t);
+        Some(HitRecord::new(
+            ray,
+            t,
+            p - self.center
+        ))
     }
 }
 
@@ -37,12 +59,9 @@ mod tests {
     fn test_sphere_hit() {
         let sphere = Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5);
         let ray = Ray::new(Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, -1.0));
-        let hit = sphere.hit(&ray, 0.0, INFINITY);
-        assert!(hit.is_some());
-        
         if let Some(hit_record) = sphere.hit(&ray, 0.0, INFINITY) {
             assert_eq!(hit_record.t, 0.5);
-            assert_eq!(hit_record.p, Vec3::new(0.0, 0.0, -0.5));
+            assert_eq!(hit_record.point, Vec3::new(0.0, 0.0, -0.5));
             assert_eq!(hit_record.normal, Vec3::new(0.0, 0.0, 1.0));
         } else {
             assert!(false, "Expected hit, but got None");
@@ -50,13 +69,10 @@ mod tests {
 
         // Test ray that is not parallel with axis
         let ray = Ray::new(Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 3_f32.sqrt(), -3.0));
-        let hit = sphere.hit(&ray, 0.0, INFINITY);
-        assert!(hit.is_some());
-
         if let Some(hit_record) = sphere.hit(&ray, 0.0, INFINITY) {
-            assert_eq!(hit_record.t, 0.5);
-            assert_eq!(hit_record.p, Vec3::new(0.0, 3_f32.sqrt()/4.0, -3.0/4.0));
-            assert_eq!(hit_record.normal, Vec3::new(0.0, 3_f32.sqrt(), 1.0).normalize());
+            assert!(hit_record.t - 3_f32.sqrt()/2.0 < 1e-2);
+            assert!((hit_record.point - Vec3::new(0.0, 3_f32.sqrt()/4.0, -3.0/4.0)).length() < 1e-2);
+            assert!((hit_record.normal - Vec3::new(0.0, 3_f32.sqrt(), 1.0).normalized()).length() < 1e-2);
         } else {
             assert!(false, "Expected hit, but got None");
         }

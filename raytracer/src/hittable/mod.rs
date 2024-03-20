@@ -5,9 +5,23 @@ pub trait Hittable {
 }
 
 pub struct HitRecord {
+    pub t: Float,
     pub point: Vec3,
     pub normal: Vec3,
-    pub t: Float,
+    pub front_face: bool,
+}
+
+impl HitRecord {
+    pub fn new(ray: &Ray, t: Float, outward_normal: Vec3) -> HitRecord {
+        let point = ray.at(t);
+        let front_face = ray.direction().dot(&outward_normal) < 0.0;
+        let normal = if front_face {
+            outward_normal.normalized()
+        } else {
+            -outward_normal.normalized()
+        };
+        HitRecord { t, point, normal, front_face }
+    }
 }
 
 pub mod sphere;

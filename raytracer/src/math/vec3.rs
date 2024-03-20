@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 
 use crate::{image::Color, Float};
 
@@ -46,6 +46,13 @@ impl Vec3 {
             self.z * other.x - self.x * other.z,
             self.x * other.y - self.y * other.x,
         )
+    }
+}
+
+impl Neg for Vec3 {
+    type Output = Self;
+    fn neg(self) -> Self::Output {
+        Vec3::new(-self.x, -self.y, -self.z)
     }
 }
 
@@ -187,6 +194,9 @@ mod tests {
         let vec2 = Vec3::new(4.0, 5.0, 6.0);
         let vec3 = Vec3::new_diagonal(INFINITY);
         let vec4 = Vec3::new(1.0, 0.0, INFINITY);
+
+        // Neg
+        assert_eq!(-vec1, Vec3::new(-1.0, -2.0, -3.0));
         
         // Addition
         let result = vec1 + vec2;
