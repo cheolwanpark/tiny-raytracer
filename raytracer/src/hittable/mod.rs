@@ -1,7 +1,9 @@
+use std::ops::Range;
+
 use crate::{math::vec3::Vec3, ray::Ray, Float};
 
 pub trait Hittable {
-    fn hit(&self, ray: &Ray, t_min: Float, t_max: Float) -> Option<HitRecord>;
+    fn hit(&self, ray: &Ray, t_range: Range<Float>) -> Option<HitRecord>;
 }
 
 pub struct HitRecord {

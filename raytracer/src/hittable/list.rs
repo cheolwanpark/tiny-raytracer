@@ -1,3 +1,5 @@
+use std::ops::Range;
+
 use crate::{ray::Ray, Float};
 
 use super::{HitRecord, Hittable};
@@ -19,12 +21,13 @@ impl HittableList {
 }
 
 impl Hittable for HittableList {
-    fn hit(&self, ray: &Ray, t_min: Float, mut t_max: Float) -> Option<HitRecord> {
+    fn hit(&self, ray: &Ray, t_range: Range<Float>) -> Option<HitRecord> {
         let mut hit_record = None;
+        let mut t_range = t_range;
 
         for object in &self.objects {
-            if let Some(record) = object.hit(ray, t_min, t_max) {
-                t_max = record.t;
+            if let Some(record) = object.hit(ray, t_range.clone()) {
+                t_range.end = record.t;
                 hit_record = Some(record);
             }
         }

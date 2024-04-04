@@ -12,8 +12,12 @@ impl ImageOptions {
 }
 
 pub trait Renderer {
-    fn ray_color(&self, ray: Ray, world: &Box<dyn Hittable>, depth: u32) -> Vec3;
     fn render(&self, camera: Camera, world: Box<dyn Hittable>, image_options: ImageOptions) -> Image;
 }
 
+pub trait ColorSampler {
+    fn sample(&self, ray: Ray, world: &Box<dyn Hittable>, depth: u32) -> Vec3;
+}
+
 pub mod bruteforce;
+pub mod colorsampler;

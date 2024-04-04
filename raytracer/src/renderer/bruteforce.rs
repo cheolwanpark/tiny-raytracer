@@ -1,28 +1,19 @@
-use super::{Renderer, ImageOptions};
-use crate::{camera::Camera, hittable::{Hittable, list::HittableList, sphere::Sphere}, image::Image, math::vec3::Vec3, random::random_float, Float};
+use super::{ColorSampler, ImageOptions, Renderer};
+use crate::{camera::Camera, hittable::Hittable, image::Image, math::vec3::Vec3, random::random_float, Float};
 
 pub struct BruteForceRenderer {
+    pub color_sampler: Box<dyn ColorSampler>,
     pub samples_per_pixel: u32,
     pub max_depth: u32,
 }
 
 impl BruteForceRenderer {
-    pub fn new(samples_per_pixel: u32, max_depth: u32) -> BruteForceRenderer {
-        BruteForceRenderer { samples_per_pixel, max_depth }
+    pub fn new(color_sampler: Box<dyn ColorSampler>, samples_per_pixel: u32, max_depth: u32) -> BruteForceRenderer {
+        BruteForceRenderer { color_sampler, samples_per_pixel, max_depth }
     }
 }
 
 impl Renderer for BruteForceRenderer {
-    fn ray_color(&self, ray: crate::ray::Ray, world: &Box<dyn Hittable>, depth: u32) -> Vec3 {
-        if let Some(rec) = world.hit(&ray, 0.0, Float::INFINITY) {
-            0.5 * (rec.normal + Vec3::new(1.0, 1.0, 1.0))
-        } else {
-            let direction = ray.direction();
-            let a = 0.5*(direction.y + 1.0);
-            return (1.0-a)*Vec3::new(1.0, 1.0, 1.0) + a*Vec3::new(0.5, 0.7, 1.0);
-        }
-    }
-
     fn render(&self, camera: Camera, world: Box<dyn Hittable>, image_options: ImageOptions) -> Image {
         let mut image = Image::new(image_options.width, image_options.height);
 
@@ -36,7 +27,7 @@ impl Renderer for BruteForceRenderer {
 
                     let ray = camera.get_ray(u, v);
 
-                    pixel_color += self.ray_color(ray, &world, self.max_depth) / self.samples_per_pixel as Float;
+                    pixel_color += self.color_sampler.sample(ray, &world, self.max_depth) / self.samples_per_pixel as Float;
                 }
 
                 image.set_pixel(i, j, pixel_color.into());
@@ -49,7 +40,7 @@ impl Renderer for BruteForceRenderer {
 
 #[cfg(test)]
 mod test {
-    use crate::hittable::list::HittableList;
+    use crate::{hittable::{list::HittableList, sphere::Sphere}, renderer::colorsampler::NormalSampler};
 
     use super::*;
 
@@ -72,7 +63,7 @@ mod test {
         world.push(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)));
         world.push(Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)));
 
-        let renderer = BruteForceRenderer::new(100, 50);
+        let renderer = BruteForceRenderer::new(Box::new(NormalSampler::new()), 100, 50);
         let image = renderer.render(camera, world, image_options);
         image.save("output/bruteforce.png")
     }
