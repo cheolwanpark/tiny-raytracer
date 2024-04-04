@@ -1,4 +1,5 @@
 pub type Float = f32;
+pub use std::f32::consts as FloatConsts;
 
 pub mod image;
 pub mod math;

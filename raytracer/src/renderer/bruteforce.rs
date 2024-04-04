@@ -15,7 +15,7 @@ impl BruteForceRenderer {
 
 impl Renderer for BruteForceRenderer {
     fn render(&self, camera: Camera, world: Box<dyn Hittable>, image_options: ImageOptions) -> Image {
-        let mut image = Image::new(image_options.width, image_options.height);
+        let mut image = Image::new_with_gamma_correction(image_options.width, image_options.height, 2.2);
 
         for j in 0..image_options.height {
             for i in 0..image_options.width {
@@ -40,7 +40,7 @@ impl Renderer for BruteForceRenderer {
 
 #[cfg(test)]
 mod test {
-    use crate::{hittable::{list::HittableList, sphere::Sphere}, renderer::colorsampler::NormalSampler};
+    use crate::{hittable::{list::HittableList, sphere::Sphere}, renderer::colorsampler::GeneralSampler};
 
     use super::*;
 
@@ -63,7 +63,7 @@ mod test {
         world.push(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)));
         world.push(Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)));
 
-        let renderer = BruteForceRenderer::new(Box::new(NormalSampler::new()), 100, 50);
+        let renderer = BruteForceRenderer::new(Box::new(GeneralSampler::new()), 50, 10);
         let image = renderer.render(camera, world, image_options);
         image.save("output/bruteforce.png")
     }

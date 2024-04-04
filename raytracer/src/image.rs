@@ -6,6 +6,7 @@ pub struct Image {
     width: usize,
     height: usize,
     data: Vec<Color>,
+    gamma: Option<Float>,
 }
 
 #[derive(Clone, Copy)]
@@ -21,11 +22,25 @@ impl Image {
             width,
             height,
             data: vec![Color::new_grey(0.0); width*height],
+            gamma: None,
+        }
+    }
+
+    pub fn new_with_gamma_correction(width: usize, height: usize, gamma: Float) -> Image {
+        Image {
+            width,
+            height,
+            data: vec![Color::new_grey(0.0); width*height],
+            gamma: Some(gamma)
         }
     }
 
     pub fn set_pixel(&mut self, x: usize, y: usize, color: Color) {
-        self.data[y * self.width + x] = color;
+        self.data[y * self.width + x] = if let Some(gamma) = self.gamma {
+            color.gamma_correction(gamma)
+        } else {
+            color
+        };
     }
 
     pub fn get_pixel(&self, x: usize, y: usize) -> Color {
@@ -65,14 +80,24 @@ impl Color {
     pub fn new_grey(value: Float) -> Color {
         Color { r: value, g: value, b: value }
     }
+
+    pub fn gamma_correction(&self, gamma: Float) -> Color {
+        Color {
+            r: self.r.powf(1.0 / gamma),
+            g: self.g.powf(1.0 / gamma),
+            b: self.b.powf(1.0 / gamma),
+        }
+    }
 }
 
 impl From<Color> for Rgb<u8> {
     fn from(color: Color) -> Rgb<u8> {
+        const INTENSITY_MIN: Float = 0.000;
+        const INTENSITY_MAX: Float = 0.999;
         Rgb([
-            (color.r * 255.0) as u8,
-            (color.g * 255.0) as u8,
-            (color.b * 255.0) as u8,
+            (color.r.clamp(INTENSITY_MIN, INTENSITY_MAX) * 255.0) as u8,
+            (color.g.clamp(INTENSITY_MIN, INTENSITY_MAX) * 255.0) as u8,
+            (color.b.clamp(INTENSITY_MIN, INTENSITY_MAX) * 255.0) as u8,
         ])
     }
 }
