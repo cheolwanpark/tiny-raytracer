@@ -1,6 +1,6 @@
-use std::ops::Range;
+use std::{ops::Range, rc::Rc};
 
-use crate::{math::vec3::Vec3, ray::Ray, Float};
+use crate::{material::Material, math::vec3::Vec3, ray::Ray, Float};
 
 pub trait Hittable {
     fn hit(&self, ray: &Ray, t_range: Range<Float>) -> Option<HitRecord>;
@@ -11,10 +11,16 @@ pub struct HitRecord {
     pub point: Vec3,
     pub normal: Vec3,
     pub front_face: bool,
+    pub material: Rc<Box<dyn Material>>,
 }
 
 impl HitRecord {
-    pub fn new(ray: &Ray, t: Float, outward_normal: Vec3) -> HitRecord {
+    pub fn new(
+        ray: &Ray,
+        t: Float,
+        outward_normal: Vec3,
+        material: Rc<Box<dyn Material>>,
+    ) -> HitRecord {
         let point = ray.at(t);
         let front_face = ray.direction().dot(&outward_normal) < 0.0;
         let normal = if front_face {
@@ -22,9 +28,15 @@ impl HitRecord {
         } else {
             -outward_normal.normalized()
         };
-        HitRecord { t, point, normal, front_face }
+        HitRecord {
+            t,
+            point,
+            normal,
+            front_face,
+            material,
+        }
     }
 }
 
-pub mod sphere;
 pub mod list;
+pub mod sphere;

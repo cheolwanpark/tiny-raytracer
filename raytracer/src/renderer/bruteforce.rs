@@ -1,7 +1,9 @@
 use indicatif::ProgressBar;
 
 use super::{ColorSampler, ImageOptions, Renderer};
-use crate::{camera::Camera, hittable::Hittable, image::Image, math::vec3::Vec3, random::random_float, Float};
+use crate::{
+    camera::Camera, hittable::Hittable, image::Image, math::vec3::Vec3, random::random_float, Float,
+};
 
 pub struct BruteForceRenderer {
     color_sampler: Box<dyn ColorSampler>,
@@ -11,8 +13,17 @@ pub struct BruteForceRenderer {
 }
 
 impl BruteForceRenderer {
-    pub fn new(color_sampler: Box<dyn ColorSampler>, samples_per_pixel: u32, max_depth: u32) -> BruteForceRenderer {
-        BruteForceRenderer { color_sampler, samples_per_pixel, max_depth, verbose: true }
+    pub fn new(
+        color_sampler: Box<dyn ColorSampler>,
+        samples_per_pixel: u32,
+        max_depth: u32,
+    ) -> BruteForceRenderer {
+        BruteForceRenderer {
+            color_sampler,
+            samples_per_pixel,
+            max_depth,
+            verbose: true,
+        }
     }
 
     pub fn set_verbose(&mut self, verbose: bool) {
@@ -21,11 +32,19 @@ impl BruteForceRenderer {
 }
 
 impl Renderer for BruteForceRenderer {
-    fn render(&self, camera: Camera, world: Box<dyn Hittable>, image_options: ImageOptions) -> Image {
-        let mut image = Image::new_with_gamma_correction(image_options.width, image_options.height, 2.2);
+    fn render(
+        &self,
+        camera: Camera,
+        world: Box<dyn Hittable>,
+        image_options: ImageOptions,
+    ) -> Image {
+        let mut image =
+            Image::new_with_gamma_correction(image_options.width, image_options.height, 2.2);
 
-        let progressbar = if self.verbose { 
-            Some(ProgressBar::new(image_options.width as u64 * image_options.height as u64))
+        let progressbar = if self.verbose {
+            Some(ProgressBar::new(
+                image_options.width as u64 * image_options.height as u64,
+            ))
         } else {
             None
         };
@@ -40,7 +59,8 @@ impl Renderer for BruteForceRenderer {
 
                     let ray = camera.get_ray(u, v);
 
-                    pixel_color += self.color_sampler.sample(ray, &world, self.max_depth) / self.samples_per_pixel as Float;
+                    pixel_color += self.color_sampler.sample(ray, &world, self.max_depth)
+                        / self.samples_per_pixel as Float;
                 }
 
                 image.set_pixel(i, j, pixel_color.into());
@@ -60,7 +80,13 @@ impl Renderer for BruteForceRenderer {
 
 #[cfg(test)]
 mod test {
-    use crate::{hittable::{list::HittableList, sphere::Sphere}, renderer::colorsampler::GeneralSampler};
+    use std::rc::Rc;
+
+    use crate::{
+        hittable::{list::HittableList, sphere::Sphere},
+        material::{lambertian::Lambertian, metal::Metal, Material},
+        renderer::colorsampler::GeneralSampler,
+    };
 
     use super::*;
 
@@ -71,17 +97,45 @@ mod test {
         let aspect_ratio = 16.0 / 9.0;
         let image_options = ImageOptions::new(width, (width as Float / aspect_ratio) as usize);
         let camera = Camera::new(
-            1.0, 
-            Vec3::zero(), 
-            Vec3::new(0.0, 0.0, -1.0), 
+            1.0,
+            Vec3::zero(),
+            Vec3::new(0.0, 0.0, -1.0),
             Vec3::new(0.0, 1.0, 0.0),
-             90.0, 
-             aspect_ratio
+            90.0,
+            aspect_ratio,
         );
 
+        let mat_ground: Rc<Box<dyn Material>> =
+            Rc::new(Box::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0))));
+        let mat_center: Rc<Box<dyn Material>> =
+            Rc::new(Box::new(Lambertian::new(Vec3::new(0.1, 0.2, 0.5))));
+        let mat_left: Rc<Box<dyn Material>> =
+            Rc::new(Box::new(Metal::new(Vec3::new(0.8, 0.8, 0.8), 0.3)));
+        let mat_right: Rc<Box<dyn Material>> =
+            Rc::new(Box::new(Metal::new(Vec3::new(0.8, 0.6, 0.2), 1.0)));
+
         let mut world = Box::new(HittableList::new());
-        world.push(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)));
-        world.push(Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)));
+        world.push(Box::new(Sphere::new(
+            Vec3::new(0.0, -100.5, -1.0),
+            100.0,
+            mat_ground,
+        )));
+        world.push(Box::new(Sphere::new(
+            Vec3::new(0.0, 0.0, -1.2),
+            0.5,
+            mat_center,
+        )));
+        
+        world.push(Box::new(Sphere::new(
+            Vec3::new(1.0, 0.0, -1.0),
+            0.5,
+            mat_left,
+        )));
+        world.push(Box::new(Sphere::new(
+            Vec3::new(-1.0, 0.0, -1.0),
+            0.5,
+            mat_right,
+        )));
 
         let renderer = BruteForceRenderer::new(Box::new(GeneralSampler::new()), 50, 10);
         let image = renderer.render(camera, world, image_options);

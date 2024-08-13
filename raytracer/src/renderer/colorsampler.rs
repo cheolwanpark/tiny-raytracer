@@ -37,12 +37,15 @@ impl ColorSampler for GeneralSampler {
         }
 
         if let Some(rec) = world.hit(&ray, 0.001..Float::INFINITY) {
-            let direction = rec.normal + Vec3::new_random_unit_vector();
-            0.5 * self.sample(crate::ray::Ray::new(rec.point, direction), world, depth - 1)
+            if let Some((ray, attenuation)) = rec.material.scatter(&ray, &rec) {
+                return attenuation * self.sample(ray, world, depth - 1);
+            } else {
+                Vec3::zero()
+            }
         } else {
             let direction = ray.direction();
             let a = 0.5 * (direction.y + 1.0);
-            return (1.0 - a) * Vec3::new(1.0, 1.0, 1.0) + a * Vec3::new(0.5, 0.7, 1.0);
+            (1.0 - a) * Vec3::new(1.0, 1.0, 1.0) + a * Vec3::new(0.5, 0.7, 1.0)
         }
     }
 }

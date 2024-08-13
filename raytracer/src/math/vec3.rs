@@ -1,4 +1,6 @@
-use std::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Range, Sub, SubAssign};
+use std::ops::{
+    Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Range, Sub, SubAssign,
+};
 
 use rand::random;
 
@@ -30,7 +32,6 @@ impl Vec3 {
         )
     }
 
-
     pub fn new_random_in_unit_sphere() -> Self {
         let mut p = Vec3::new_random_range(-1.0..1.0);
         while p.squared_length() >= 1.0 {
@@ -56,9 +57,13 @@ impl Vec3 {
         Self::new_random_range(0.0..1.0)
     }
 
-
     pub fn zero() -> Self {
         Vec3::new(0.0, 0.0, 0.0)
+    }
+
+    pub fn near_zero(&self) -> bool {
+        let s = 1e-8;
+        self.x.abs() < s && self.y.abs() < s && self.z.abs() < s
     }
 
     pub fn length(&self) -> Float {
@@ -83,6 +88,10 @@ impl Vec3 {
             self.z * other.x - self.x * other.z,
             self.x * other.y - self.y * other.x,
         )
+    }
+
+    pub fn reflect(&self, normal: &Self) -> Self {
+        self.clone() - 2.0 * self.dot(normal) * normal.clone()
     }
 }
 
@@ -224,7 +233,7 @@ mod tests {
     use std::f32::INFINITY;
 
     use super::*;
-    
+
     #[test]
     fn arithmetic_test() {
         let vec1 = Vec3::new(1.0, 2.0, 3.0);
@@ -234,20 +243,20 @@ mod tests {
 
         // Neg
         assert_eq!(-vec1, Vec3::new(-1.0, -2.0, -3.0));
-        
+
         // Addition
         let result = vec1 + vec2;
         assert_eq!(result, Vec3::new(5.0, 7.0, 9.0));
         assert_eq!(vec1 + vec2, vec2 + vec1);
         let result = vec1 + vec3;
         assert!(result.x.is_infinite() && result.y.is_infinite() && result.z.is_infinite());
-        
+
         // Subtraction
         let result = vec1 - vec2;
         assert_eq!(result, Vec3::new(-3.0, -3.0, -3.0));
         let result = vec1 - vec3;
         assert!(result.x.is_infinite() && result.y.is_infinite() && result.z.is_infinite());
-        
+
         // Multiplication
         let result = vec1 * 2.0;
         assert_eq!(result, Vec3::new(2.0, 4.0, 6.0));
@@ -256,7 +265,7 @@ mod tests {
         assert_eq!(result, Vec3::new(1.0, 0.0, INFINITY));
         let result = vec1 * INFINITY;
         assert_eq!(result, Vec3::new_diagonal(INFINITY));
-        
+
         // Division
         let result = vec1 / 2.0;
         assert_eq!(result, Vec3::new(0.5, 1.0, 1.5));
@@ -266,22 +275,21 @@ mod tests {
         assert_eq!(result, Vec3::zero());
         let result = vec1 / 0.0;
         assert!(result.x.is_infinite() && result.y.is_infinite() && result.z.is_infinite());
-        
     }
-    
+
     #[test]
     fn vector_test() {
         let vec1 = Vec3::new(1.0, 2.0, 3.0);
         let vec2 = Vec3::new(4.0, 5.0, 6.0);
-        
+
         // Length
         let length = vec1.length();
         assert_eq!(length, (14.0 as Float).sqrt());
-        
+
         // Dot product
         let dot_product = vec1.dot(&vec2);
         assert_eq!(dot_product, 32.0);
-        
+
         // Cross product
         let cross_product = vec1.cross(&vec2);
         assert_eq!(cross_product, Vec3::new(-3.0, 6.0, -3.0));

@@ -1,12 +1,14 @@
 use raytracer::{
     camera::Camera,
     hittable::{list::HittableList, sphere::Sphere},
+    material::{lambertian::Lambertian, Material},
     math::vec3::Vec3,
     renderer::{
         bruteforce::BruteForceRenderer, colorsampler::GeneralSampler, ImageOptions, Renderer,
     },
     Float,
 };
+use std::rc::Rc;
 
 fn main() {
     let width = 400_usize;
@@ -23,9 +25,19 @@ fn main() {
 
     let _renderer = BruteForceRenderer::new(Box::new(GeneralSampler::new()), 50, 10);
 
+    let mat: Rc<Box<dyn Material>> = Rc::new(Box::new(Lambertian::new(Vec3::new(0.8, 0.8, 0.0))));
+
     let mut world = Box::new(HittableList::new());
-    world.push(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)));
-    world.push(Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)));
+    world.push(Box::new(Sphere::new(
+        Vec3::new(0.0, 0.0, -1.0),
+        0.5,
+        mat.clone(),
+    )));
+    world.push(Box::new(Sphere::new(
+        Vec3::new(0.0, -100.5, -1.0),
+        100.0,
+        mat.clone(),
+    )));
 
     let renderer = BruteForceRenderer::new(Box::new(GeneralSampler::new()), 50, 10);
     let image = renderer.render(camera, world, image_options);

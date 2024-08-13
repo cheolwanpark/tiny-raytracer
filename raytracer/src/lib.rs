@@ -7,6 +7,7 @@ pub use std::f32::consts as FloatConsts;
 pub mod camera;
 pub mod hittable;
 pub mod image;
+pub mod material;
 pub mod math;
 pub mod random;
 pub mod ray;
