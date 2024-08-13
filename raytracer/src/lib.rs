@@ -1,10 +1,13 @@
+#![allow(dead_code)]
+#![allow(unused_imports)]
+
 pub type Float = f32;
 pub use std::f32::consts as FloatConsts;
 
-pub mod image;
-pub mod math;
-pub mod ray;
 pub mod camera;
 pub mod hittable;
-pub mod renderer;
+pub mod image;
+pub mod math;
 pub mod random;
+pub mod ray;
+pub mod renderer;

@@ -11,15 +11,14 @@ impl NormalSampler {
 }
 
 impl ColorSampler for NormalSampler {
-    fn sample(&self, ray: crate::ray::Ray, world: &Box<dyn Hittable>, depth: u32) -> Vec3 {
+    fn sample(&self, ray: crate::ray::Ray, world: &Box<dyn Hittable>, _depth: u32) -> Vec3 {
         if let Some(rec) = world.hit(&ray, 0.0..Float::INFINITY) {
             0.5 * (rec.normal + Vec3::new(1.0, 1.0, 1.0))
         } else {
             let direction = ray.direction();
-            let a = 0.5*(direction.y + 1.0);
-            return (1.0-a)*Vec3::new(1.0, 1.0, 1.0) + a*Vec3::new(0.5, 0.7, 1.0);
+            let a = 0.5 * (direction.y + 1.0);
+            return (1.0 - a) * Vec3::new(1.0, 1.0, 1.0) + a * Vec3::new(0.5, 0.7, 1.0);
         }
-        
     }
 }
 
@@ -34,7 +33,7 @@ impl GeneralSampler {
 impl ColorSampler for GeneralSampler {
     fn sample(&self, ray: crate::ray::Ray, world: &Box<dyn Hittable>, depth: u32) -> Vec3 {
         if depth == 0 {
-            return Vec3::zero()
+            return Vec3::zero();
         }
 
         if let Some(rec) = world.hit(&ray, 0.001..Float::INFINITY) {
@@ -42,8 +41,8 @@ impl ColorSampler for GeneralSampler {
             0.5 * self.sample(crate::ray::Ray::new(rec.point, direction), world, depth - 1)
         } else {
             let direction = ray.direction();
-            let a = 0.5*(direction.y + 1.0);
-            return (1.0-a)*Vec3::new(1.0, 1.0, 1.0) + a*Vec3::new(0.5, 0.7, 1.0);
+            let a = 0.5 * (direction.y + 1.0);
+            return (1.0 - a) * Vec3::new(1.0, 1.0, 1.0) + a * Vec3::new(0.5, 0.7, 1.0);
         }
     }
 }
