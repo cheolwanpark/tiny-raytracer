@@ -4,7 +4,7 @@ use std::ops::{
 
 use rand::random;
 
-use crate::{image::Color, random::random_float_range, Float, FloatConsts};
+use crate::{image::Color, Float, FloatConsts};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Vec3 {
@@ -22,39 +22,6 @@ impl Vec3 {
 
     pub fn new_diagonal(v: Float) -> Self {
         Vec3::new(v, v, v)
-    }
-
-    pub fn new_random_range(range: Range<Float>) -> Self {
-        Vec3::new(
-            random_float_range(range.clone()),
-            random_float_range(range.clone()),
-            random_float_range(range),
-        )
-    }
-
-    pub fn new_random_in_unit_sphere() -> Self {
-        let mut p = Vec3::new_random_range(-1.0..1.0);
-        while p.squared_length() >= 1.0 {
-            p = Vec3::new_random_range(-1.0..1.0);
-        }
-        p
-    }
-
-    pub fn new_random_unit_vector() -> Self {
-        Self::new_random_in_unit_sphere().normalized()
-    }
-
-    pub fn new_random_on_hemisphere(normal: &Vec3) -> Self {
-        let on_unit_sphere = Vec3::new_random_unit_vector();
-        if on_unit_sphere.dot(normal) > 0.0 {
-            on_unit_sphere
-        } else {
-            -on_unit_sphere
-        }
-    }
-
-    pub fn new_random() -> Self {
-        Self::new_random_range(0.0..1.0)
     }
 
     pub fn zero() -> Self {
@@ -88,10 +55,6 @@ impl Vec3 {
             self.z * other.x - self.x * other.z,
             self.x * other.y - self.y * other.x,
         )
-    }
-
-    pub fn reflect(&self, normal: &Self) -> Self {
-        self.clone() - 2.0 * self.dot(normal) * normal.clone()
     }
 }
 

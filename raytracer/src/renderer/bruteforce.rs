@@ -84,7 +84,7 @@ mod test {
 
     use crate::{
         hittable::{list::HittableList, sphere::Sphere},
-        material::{lambertian::Lambertian, metal::Metal, Material},
+        material::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal, Material},
         renderer::colorsampler::GeneralSampler,
     };
 
@@ -93,7 +93,7 @@ mod test {
     #[test]
     #[ignore]
     fn test_bruteforce_renderer() {
-        let width = 400_usize;
+        let width = 800_usize;
         let aspect_ratio = 16.0 / 9.0;
         let image_options = ImageOptions::new(width, (width as Float / aspect_ratio) as usize);
         let camera = Camera::new(
@@ -110,7 +110,9 @@ mod test {
         let mat_center: Rc<Box<dyn Material>> =
             Rc::new(Box::new(Lambertian::new(Vec3::new(0.1, 0.2, 0.5))));
         let mat_left: Rc<Box<dyn Material>> =
-            Rc::new(Box::new(Metal::new(Vec3::new(0.8, 0.8, 0.8), 0.3)));
+            Rc::new(Box::new(Dielectric::new(Vec3::new(1.0, 1.0, 1.0), 1.5)));
+        let mat_left_inner: Rc<Box<dyn Material>> =
+            Rc::new(Box::new(Dielectric::new(Vec3::new(1.0, 1.0, 1.0), 1.0/1.5)));
         let mat_right: Rc<Box<dyn Material>> =
             Rc::new(Box::new(Metal::new(Vec3::new(0.8, 0.6, 0.2), 1.0)));
 
@@ -120,6 +122,7 @@ mod test {
             100.0,
             mat_ground,
         )));
+
         world.push(Box::new(Sphere::new(
             Vec3::new(0.0, 0.0, -1.2),
             0.5,
@@ -132,12 +135,18 @@ mod test {
             mat_left,
         )));
         world.push(Box::new(Sphere::new(
+            Vec3::new(1.0, 0.0, -1.0),
+            0.4,
+            mat_left_inner
+        )));
+
+        world.push(Box::new(Sphere::new(
             Vec3::new(-1.0, 0.0, -1.0),
             0.5,
             mat_right,
         )));
 
-        let renderer = BruteForceRenderer::new(Box::new(GeneralSampler::new()), 50, 10);
+        let renderer = BruteForceRenderer::new(Box::new(GeneralSampler::new()), 100, 20);
         let image = renderer.render(camera, world, image_options);
         image.save("output/bruteforce.png")
     }
