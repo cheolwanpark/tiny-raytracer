@@ -12,3 +12,5 @@ pub mod math;
 pub mod random;
 pub mod ray;
 pub mod renderer;
+
+pub mod accel;
