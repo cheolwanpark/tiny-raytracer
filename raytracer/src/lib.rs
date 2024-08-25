@@ -11,5 +11,6 @@ pub mod material;
 pub mod math;
 pub mod ray;
 pub mod renderer;
+pub mod pipeline;
 
 pub mod accel;
