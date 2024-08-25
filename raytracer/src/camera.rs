@@ -50,7 +50,7 @@ impl Camera {
 
 #[cfg(test)]
 mod test {
-    use crate::image::Image;
+    use crate::utils::image::Image;
 
     use super::*;
     #[test]
