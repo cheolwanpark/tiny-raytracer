@@ -2,7 +2,7 @@ use indicatif::ProgressBar;
 
 use super::{ColorSampler, ImageOptions, Renderer};
 use crate::{
-    camera::Camera, hittable::Hittable, image::Image, math::vec3::Vec3, random::random_float, Float,
+    camera::Camera, hittable::Hittable, utils::image::Image, math::vec3::Vec3, utils::random::random_float, Float,
 };
 
 pub struct BruteForceRenderer {

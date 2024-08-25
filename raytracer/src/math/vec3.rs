@@ -4,7 +4,7 @@ use std::ops::{
 
 use rand::random;
 
-use crate::{image::Color, Float, FloatConsts};
+use crate::{utils::image::Color, Float, FloatConsts};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Vec3 {

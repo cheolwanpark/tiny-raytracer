@@ -1,4 +1,4 @@
-use crate::{camera::Camera, hittable::Hittable, image::Image, math::vec3::Vec3, ray::Ray};
+use crate::{camera::Camera, hittable::Hittable, utils::image::Image, math::vec3::Vec3, ray::Ray};
 
 pub struct ImageOptions {
     pub width: usize,

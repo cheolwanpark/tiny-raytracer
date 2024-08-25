@@ -1,4 +1,4 @@
-use crate::{hittable::HitRecord, math::vec3::Vec3, random::random_float, ray::Ray, Float};
+use crate::{hittable::HitRecord, math::vec3::Vec3, utils::random::random_float, ray::Ray, Float};
 
 use super::Material;
 

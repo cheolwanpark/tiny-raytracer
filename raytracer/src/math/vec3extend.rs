@@ -1,4 +1,4 @@
-use crate::{random::random_float_range, Float};
+use crate::{utils::random::random_float_range, Float};
 use std::ops::Range;
 
 use super::vec3::Vec3;

@@ -1,5 +1,5 @@
 use super::Material;
-use crate::{hittable::HitRecord, math::vec3::Vec3, random, ray::Ray};
+use crate::{hittable::HitRecord, math::vec3::Vec3, utils::random, ray::Ray};
 
 pub struct Lambertian {
     albedo: Vec3,
