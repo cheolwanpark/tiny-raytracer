@@ -1,5 +1,6 @@
 use std::sync::Arc;
-use tokio::{sync::mpsc::Sender, task::JoinHandle};
+use tokio::task::JoinHandle;
+use flume::Sender;
 
 use crate::{camera::Camera, utils::{image::Image, random::random_float}, Float};
 
@@ -18,7 +19,7 @@ impl SampleGenerator {
         })
     }
 
-    pub async fn begin(self: Arc<Self>, sender: Sender<Sample>, num_threads: usize) -> JoinHandle<()> {
+    fn begin(self: Arc<Self>, sender: Sender<Sample>, num_threads: usize) -> JoinHandle<()> {
         tokio::spawn(async move {
             self._begin(sender, num_threads).await;
         })
@@ -48,11 +49,9 @@ impl SampleGenerator {
                             let u = (x as Float + random_float()) / (width - 1) as Float;
                             let v = (y as Float + random_float()) / (height - 1) as Float;
                             let ray = camera.get_ray(u, v);
-
-                            sender.send(Sample {
+                            sender.send_async(Sample {
                                 x, y, ray
-                            }).await
-                            .expect(format!("Failed to send sample on thread#{}", i).as_str());
+                            }).await.expect(format!("Failed to send sample on thread#{}", i).as_str());
                         }
                     }
                 }
@@ -67,7 +66,8 @@ impl SampleGenerator {
 
 #[cfg(test)]
 mod tests {
-    use tokio::{sync::mpsc::channel, task::JoinHandle};
+    use tokio;
+    use flume::bounded;
 
     use super::*;
     use crate::{math::vec3::Vec3, Float};
@@ -92,22 +92,20 @@ mod tests {
         );
         let generator = SampleGenerator::new(image_descriptor, camera);
 
-        let (tx, mut rx) = channel(128);
-        let send_handles = generator.begin(tx, 3);
+        let (tx, rx) = bounded(128);
+        let send_handle = generator.begin(tx, 4);
 
+        
         let recv_handle = tokio::spawn(async move {
             let mut cnt = vec![vec![0usize; height]; width];
-            let mut buffer = Vec::new();
-            while !rx.is_closed() {
-                buffer.clear();
-                rx.recv_many(&mut buffer, 16).await;
-                for sample in &buffer {
+            while !rx.is_disconnected() {
+                if let Ok(sample) = rx.recv_async().await {
                     cnt[sample.x][sample.y] += 1;
                 }
             }
             cnt
         });
-        send_handles.await;
+        send_handle.await;
         let cnt = recv_handle.await.expect("Failed to join receive thread");
 
         for x in 0..width {
