@@ -1,4 +1,4 @@
 pub mod instance;
-pub mod samplegenerator;
+pub mod pointgen;
 pub mod dto;
 pub mod descriptor;

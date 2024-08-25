@@ -4,14 +4,14 @@ use flume::Sender;
 
 use crate::{camera::Camera, utils::{image::Image, random::random_float}, Float};
 
-use super::{descriptor::ImageDescriptor, dto::Sample};
+use super::{descriptor::ImageDescriptor, dto::SamplePoint};
 
-pub struct SampleGenerator {
+pub struct SamplePointGenerator {
     image_descriptor: ImageDescriptor,
     camera: Arc<Camera>,
 }
 
-impl SampleGenerator {
+impl SamplePointGenerator {
     pub(super) fn new(image_descriptor: ImageDescriptor, camera: Camera) -> Arc<Self> {
         Arc::new(Self { 
             image_descriptor, 
@@ -19,13 +19,13 @@ impl SampleGenerator {
         })
     }
 
-    fn begin(self: Arc<Self>, sender: Sender<Sample>, num_threads: usize) -> JoinHandle<()> {
+    fn begin(self: Arc<Self>, sender: Sender<SamplePoint>, num_threads: usize) -> JoinHandle<()> {
         tokio::spawn(async move {
             self._begin(sender, num_threads).await;
         })
     }
 
-    async fn _begin(&self, sender: Sender<Sample>, num_threads: usize) {
+    async fn _begin(&self, sender: Sender<SamplePoint>, num_threads: usize) {
         let width = self.image_descriptor.width;
         let height = self.image_descriptor.height;
         let samples_per_pixel = self.image_descriptor.samples_per_pixel;
@@ -49,7 +49,7 @@ impl SampleGenerator {
                             let u = (x as Float + random_float()) / (width - 1) as Float;
                             let v = (y as Float + random_float()) / (height - 1) as Float;
                             let ray = camera.get_ray(u, v);
-                            sender.send_async(Sample {
+                            sender.send_async(SamplePoint {
                                 x, y, ray
                             }).await.expect(format!("Failed to send sample on thread#{}", i).as_str());
                         }
@@ -90,7 +90,7 @@ mod tests {
             90.0,
             width as Float / height as Float,
         );
-        let generator = SampleGenerator::new(image_descriptor, camera);
+        let generator = SamplePointGenerator::new(image_descriptor, camera);
 
         let (tx, rx) = bounded(128);
         let send_handle = generator.begin(tx, 4);
