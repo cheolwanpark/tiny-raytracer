@@ -1,4 +1,4 @@
-use std::{ops::Range, rc::Rc};
+use std::{ops::Range, sync::Arc};
 
 use crate::{material::Material, math::vec3::Vec3, ray::Ray, Float};
 
@@ -7,11 +7,11 @@ use super::{HitRecord, Hittable};
 pub struct Sphere {
     center: Vec3,
     radius: Float,
-    material: Rc<Box<dyn Material>>,
+    material: Arc<Box<dyn Material>>,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: Float, material: Rc<Box<dyn Material>>) -> Sphere {
+    pub fn new(center: Vec3, radius: Float, material: Arc<Box<dyn Material>>) -> Sphere {
         Sphere {
             center,
             radius,
@@ -66,7 +66,7 @@ mod tests {
 
     #[test]
     fn test_sphere_hit() {
-        let dummy_mat: Rc<Box<dyn Material>> = Rc::new(Box::new(Lambertian::new(Vec3::zero())));
+        let dummy_mat: Arc<Box<dyn Material>> = Arc::new(Box::new(Lambertian::new(Vec3::zero())));
         let sphere = Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5, dummy_mat.clone());
         let ray = Ray::new(Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, -1.0));
         if let Some(hit_record) = sphere.hit(&ray, 0.0..INFINITY) {

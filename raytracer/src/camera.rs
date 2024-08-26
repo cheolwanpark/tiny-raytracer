@@ -1,5 +1,6 @@
 use crate::{math::vec3::Vec3, ray::Ray, Float};
 
+#[derive(Clone)]
 pub struct Camera {
     position: Vec3,
     viewport_upper_left: Vec3,

@@ -1,4 +1,4 @@
-use std::{ops::Range, rc::Rc};
+use std::{ops::Range, sync::Arc};
 
 use crate::{material::Material, math::vec3::Vec3, ray::Ray, Float};
 
@@ -11,7 +11,7 @@ pub struct HitRecord {
     pub point: Vec3,
     pub normal: Vec3,
     pub front_face: bool,
-    pub material: Rc<Box<dyn Material>>,
+    pub material: Arc<Box<dyn Material>>,
 }
 
 impl HitRecord {
@@ -19,7 +19,7 @@ impl HitRecord {
         ray: &Ray,
         t: Float,
         outward_normal: Vec3,
-        material: Rc<Box<dyn Material>>,
+        material: Arc<Box<dyn Material>>,
     ) -> HitRecord {
         let point = ray.at(t);
         let front_face = ray.direction().dot(&outward_normal) < 0.0;
@@ -39,4 +39,5 @@ impl HitRecord {
 }
 
 pub mod list;
+pub mod world;
 pub mod sphere;
