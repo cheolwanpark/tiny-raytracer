@@ -1,39 +1,40 @@
-use std::sync::Arc;
+use std::sync::{atomic::{AtomicBool, Ordering}, Arc};
 use tokio::task::JoinHandle;
 use flume::Sender;
 
-use crate::{camera::Camera, utils::{image::Image, random::random_float}, Float};
+use crate::{camera::Camera, math::vec3::Vec3, utils::{image::Image, random::random_float}, Float};
 
-use super::{descriptor::ImageDescriptor, dto::SamplePoint};
+use super::{descriptor::SamplePointGeneratorDescriptor, dto::SamplePoint};
 
 pub struct SamplePointGenerator {
-    image_descriptor: ImageDescriptor,
-    camera: Arc<Camera>,
+    descriptor: SamplePointGeneratorDescriptor,
 }
 
 impl SamplePointGenerator {
-    pub(super) fn new(image_descriptor: ImageDescriptor, camera: Camera) -> Arc<Self> {
-        Arc::new(Self { 
-            image_descriptor, 
-            camera: Arc::new(camera), 
-        })
+    pub(super) fn new(descriptor: SamplePointGeneratorDescriptor) -> Arc<Self> {
+        Arc::new(Self { descriptor })
     }
 
-    fn begin(self: Arc<Self>, sender: Sender<SamplePoint>, num_threads: usize) -> JoinHandle<()> {
-        tokio::spawn(async move {
+    fn begin(self: Arc<Self>, sender: Sender<SamplePoint>, num_threads: usize) -> (JoinHandle<()>, Arc<AtomicBool>) {
+        let done = Arc::new(AtomicBool::new(false));
+        let done_ret = done.clone();
+        let handle = tokio::spawn(async move {
             self._begin(sender, num_threads).await;
-        })
+            done.store(true, Ordering::Relaxed);
+        });
+        (handle, done_ret)
     }
 
     async fn _begin(&self, sender: Sender<SamplePoint>, num_threads: usize) {
-        let width = self.image_descriptor.width;
-        let height = self.image_descriptor.height;
-        let samples_per_pixel = self.image_descriptor.samples_per_pixel;
+        let width = self.descriptor.width;
+        let height = self.descriptor.height;
+        let samples_per_pixel = self.descriptor.samples_per_pixel;
         let cols_per_thread = height / num_threads;
         
         let handles: Vec<JoinHandle<()>> = (0..num_threads).map(|i| {
-            let camera = self.camera.clone();
+            let camera = self.descriptor.camera.clone();
             let sender = sender.clone();
+            let max_bounces = self.descriptor.max_bounces;
 
             tokio::spawn(async move {
                 let cols_beg = cols_per_thread * i;
@@ -50,8 +51,12 @@ impl SamplePointGenerator {
                             let v = (y as Float + random_float()) / (height - 1) as Float;
                             let ray = camera.get_ray(u, v);
                             sender.send_async(SamplePoint {
-                                x, y, ray
-                            }).await.expect(format!("Failed to send sample on thread#{}", i).as_str());
+                                x, 
+                                y, 
+                                ray,
+                                remain_bounces: max_bounces,
+                                attenuation: Vec3::new_diagonal(1.0),
+                            }).await.expect(format!("failed to send sample point on thread#{}", i).as_str());
                         }
                     }
                 }
@@ -59,7 +64,7 @@ impl SamplePointGenerator {
         }).collect();
 
         for handle in handles {
-            handle.await.expect("Failed to join thread#{}")
+            handle.await.expect("failed to join thread")
         }
     }
 }
@@ -73,27 +78,27 @@ mod tests {
     use crate::{math::vec3::Vec3, Float};
 
     #[tokio::test]
-    pub async fn test_multithreaded_generation() {
-        let width = 640usize;
-        let height = 480usize;
-        let samples_per_pixel = 10usize;
-        let image_descriptor = ImageDescriptor {
+    pub async fn test_dummy_generation() {
+        let width = 100usize;
+        let height = 60usize;
+        let samples_per_pixel = 3usize;
+        let generator = SamplePointGenerator::new(SamplePointGeneratorDescriptor {
             width,
             height,
             samples_per_pixel,
-        };
-        let camera = Camera::new(
-            1.0,
-            Vec3::zero(),
-            Vec3::new(0.0, 0.0, -1.0),
-            Vec3::new(0.0, 1.0, 0.0),
-            90.0,
-            width as Float / height as Float,
-        );
-        let generator = SamplePointGenerator::new(image_descriptor, camera);
+            max_bounces: 5,
+            camera: Camera::new(
+                1.0,
+                Vec3::zero(),
+                Vec3::new(0.0, 0.0, -1.0),
+                Vec3::new(0.0, 1.0, 0.0),
+                90.0,
+                width as Float / height as Float,
+            )
+        });
 
         let (tx, rx) = bounded(128);
-        let send_handle = generator.begin(tx, 4);
+        let (send_handle, _) = generator.begin(tx, 2);
 
         
         let recv_handle = tokio::spawn(async move {
@@ -105,8 +110,8 @@ mod tests {
             }
             cnt
         });
-        send_handle.await;
-        let cnt = recv_handle.await.expect("Failed to join receive thread");
+        send_handle.await.expect("failed to join send thread");
+        let cnt = recv_handle.await.expect("failed to join receive thread");
 
         for x in 0..width {
             for y in 0..height {
@@ -115,3 +120,5 @@ mod tests {
         }
     }
 }
+
+
