@@ -2,7 +2,7 @@ use std::sync::{atomic::{AtomicBool, Ordering}, Arc};
 use tokio::task::JoinHandle;
 use flume::Sender;
 
-use crate::{camera::Camera, math::vec3::Vec3, utils::{image::Image, random::random_float}, Float};
+use crate::{camera::Camera, math::vec3::Vec3, utils::random::random_float, Float};
 
 use super::{descriptor::SamplePointGeneratorDescriptor, dto::SamplePoint};
 
@@ -15,25 +15,33 @@ impl SamplePointGenerator {
         Arc::new(Self { descriptor })
     }
 
-    fn begin(self: Arc<Self>, sender: Sender<SamplePoint>, num_threads: usize) -> (JoinHandle<()>, Arc<AtomicBool>) {
+    fn begin(
+        self: Arc<Self>, 
+        out_channel: Sender<SamplePoint>, 
+        num_threads: usize
+    ) -> (JoinHandle<()>, Arc<AtomicBool>) {
         let done = Arc::new(AtomicBool::new(false));
         let done_ret = done.clone();
         let handle = tokio::spawn(async move {
-            self._begin(sender, num_threads).await;
+            self._begin(out_channel, num_threads).await;
             done.store(true, Ordering::Relaxed);
         });
         (handle, done_ret)
     }
 
-    async fn _begin(&self, sender: Sender<SamplePoint>, num_threads: usize) {
-        let width = self.descriptor.width;
-        let height = self.descriptor.height;
+    async fn _begin(
+        &self, 
+        out_channel: Sender<SamplePoint>, 
+        num_threads: usize
+    ) {
+        let width = self.descriptor.image.width;
+        let height = self.descriptor.image.height;
         let samples_per_pixel = self.descriptor.samples_per_pixel;
         let cols_per_thread = height / num_threads;
         
         let handles: Vec<JoinHandle<()>> = (0..num_threads).map(|i| {
             let camera = self.descriptor.camera.clone();
-            let sender = sender.clone();
+            let sender = out_channel.clone();
             let max_bounces = self.descriptor.max_bounces;
 
             tokio::spawn(async move {
@@ -75,7 +83,7 @@ mod tests {
     use flume::bounded;
 
     use super::*;
-    use crate::{math::vec3::Vec3, Float};
+    use crate::{math::vec3::Vec3, pipeline::descriptor::ImageDescriptor, Float};
 
     #[tokio::test]
     pub async fn test_dummy_generation() {
@@ -83,8 +91,10 @@ mod tests {
         let height = 60usize;
         let samples_per_pixel = 3usize;
         let generator = SamplePointGenerator::new(SamplePointGeneratorDescriptor {
-            width,
-            height,
+            image: ImageDescriptor { 
+                width,
+                height,
+            },
             samples_per_pixel,
             max_bounces: 5,
             camera: Camera::new(
