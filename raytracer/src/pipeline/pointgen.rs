@@ -15,7 +15,7 @@ impl SamplePointGenerator {
         Arc::new(Self { descriptor })
     }
 
-    fn begin(
+    pub fn begin(
         self: Arc<Self>, 
         out_channel: Sender<SamplePoint>, 
         num_threads: usize
@@ -36,7 +36,7 @@ impl SamplePointGenerator {
     ) {
         let width = self.descriptor.image.width;
         let height = self.descriptor.image.height;
-        let samples_per_pixel = self.descriptor.samples_per_pixel;
+        let samples_per_pixel = self.descriptor.image.samples_per_pixel;
         let cols_per_thread = height / num_threads;
         
         let handles: Vec<JoinHandle<()>> = (0..num_threads).map(|i| {
@@ -86,7 +86,7 @@ mod tests {
     use crate::{math::vec3::Vec3, pipeline::descriptor::ImageDescriptor, Float};
 
     #[tokio::test]
-    pub async fn test_dummy_generation() {
+    async fn test_dummy_generation() {
         let width = 100usize;
         let height = 60usize;
         let samples_per_pixel = 3usize;
@@ -94,8 +94,8 @@ mod tests {
             image: ImageDescriptor { 
                 width,
                 height,
+                samples_per_pixel,
             },
-            samples_per_pixel,
             max_bounces: 5,
             camera: Camera::new(
                 1.0,

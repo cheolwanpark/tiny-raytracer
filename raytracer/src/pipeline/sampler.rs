@@ -121,9 +121,8 @@ mod tests {
 
     use flume::bounded;
 
-    use crate::{hittable::sphere::Sphere, material::lambertian::Lambertian, ray::Ray};
-
     use super::*;
+    use crate::{hittable::sphere::Sphere, material::lambertian::Lambertian, ray::Ray};
 
     fn dummy_world() -> World {
         let mut world = World::new();
