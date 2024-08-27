@@ -12,4 +12,4 @@ indicatif = "0.17.8"
 flume = "0.11.0"
 wgpu = { version = "22.1.0" }
 bytemuck = { version = "1.17.0", features = ["derive"] }
-tokio = { version = "1.39.3", features = ["rt", "macros", "time"] }
+tokio = { version = "1.39.3", features = ["rt", "rt-multi-thread", "macros", "time"] }

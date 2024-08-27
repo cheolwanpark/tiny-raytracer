@@ -1167,6 +1167,7 @@ name = "tiny-raytracer"
 version = "0.1.0"
 dependencies = [
  "raytracer",
+ "tokio",
 ]
 
 [[package]]

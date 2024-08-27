@@ -9,17 +9,22 @@ pub struct ImageDescriptor {
 
 #[derive(Clone)]
 pub struct SamplePointGeneratorDescriptor {
+    pub num_threads: usize,
+    pub buffer_size: usize,
     pub image: ImageDescriptor,
-    pub max_bounces: u32,
     pub camera: Camera,
 }
 
+pub struct SamplerDescriptor {
+    pub num_threads: usize,
+    pub in_buffer_size: usize,
+    pub feedback_buffer_size: usize,
+    pub out_buffer_size: usize,
+    pub max_bounces: usize,
+}
+
 pub struct InstanceDescriptor {
-    pub num_point_generator_threads: usize,
-    pub num_sampler_threads: usize,
-    pub sample_point_buffer_size: usize,
-    pub sampled_color_buffer_size: usize,
     pub point_generator_descriptor: SamplePointGeneratorDescriptor,
-    pub world: World,
+    pub sampler_descriptor: SamplerDescriptor,
     pub progressbar: bool,
 }

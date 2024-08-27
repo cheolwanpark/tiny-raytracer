@@ -4,7 +4,13 @@ pub struct SamplePoint {
     pub x: usize,
     pub y: usize,
     pub ray: Ray,
-    pub remain_bounces: u32,
+}
+
+pub struct SamplerInput {
+    pub x: usize,
+    pub y: usize,
+    pub ray: Ray,
+    pub remain_bounces: usize,
     pub attenuation: Vec3,
 }
 

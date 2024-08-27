@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 raytracer = { path = "raytracer" }
+tokio = { version = "1.39.3", features = ["rt", "rt-multi-thread", "macros", "time"] }
