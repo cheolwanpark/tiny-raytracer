@@ -46,7 +46,7 @@ impl Sampler {
         let (tx_converted, rx_converted) = bounded(self.descriptor.in_buffer_size);
         let (tx_feedback, rx_feedback) = bounded(self.descriptor.feedback_buffer_size);
 
-        let converter_handles: Vec<JoinHandle<()>> = (0..(num_threads+1)).map(|i| {
+        let converter_handles: Vec<JoinHandle<()>> = (0..(num_threads+1)).map(|_| {
             let tx_converted = tx_converted.clone();
             let max_bounces = self.descriptor.max_bounces;
             let rx_in = in_channel.clone();
@@ -79,7 +79,7 @@ impl Sampler {
             })
         }).collect();
 
-        let sampler_handles: Vec<JoinHandle<()>> = (0..num_threads).map(|i| {
+        let sampler_handles: Vec<JoinHandle<()>> = (0..num_threads).map(|_| {
             let world = world.clone();
             let rx_in = rx_converted.clone();
             let tx_feedback = tx_feedback.clone();
@@ -233,7 +233,6 @@ mod tests {
             for sample_point in sample_points {
                 tx.send_async(sample_point).await.expect("failed to send sample point");
             }
-            tokio::time::sleep(Duration::from_secs(10));
         });
 
         sender_handle.await.expect("failed to join sender thread");
