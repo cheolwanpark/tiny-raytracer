@@ -10,8 +10,11 @@ pub struct AABB {
 
 impl AABB {
     pub fn new(a: Vec3, b: Vec3) -> Self {
-        let min = Vec3::new_min(a, b);
-        let max = Vec3::new_max(a, b);
+        const PADDING_AMOUNT: Float = 0.0001;
+        let padding = Vec3::new_diagonal(PADDING_AMOUNT / 2.0);
+
+        let min = Vec3::new_min(a, b) - padding;
+        let max = Vec3::new_max(a, b) + padding;
         Self { min, max }
     }
 

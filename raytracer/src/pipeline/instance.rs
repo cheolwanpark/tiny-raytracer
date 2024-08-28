@@ -96,12 +96,11 @@ mod tests {
     }
 
     #[ignore]
-    #[tokio::test(flavor = "multi_thread", worker_threads=8)]
-    async fn test_dummy_scene_rendering() {
-        println!("using {} worker threads", tokio::runtime::Handle::current().metrics().num_workers());
+    #[tokio::test(flavor = "multi_thread", worker_threads=4)]
+    async fn test_rendering() {
         let world = dummy_world();
-        let width = 800;
-        let height = 450;
+        let width = 400;
+        let height = 300;
         let instance = Instance::new(InstanceDescriptor {
             point_generator_descriptor: SamplePointGeneratorDescriptor {
                 num_threads: 2,
@@ -109,7 +108,7 @@ mod tests {
                 image: ImageDescriptor {
                     width: width,
                     height: height,
-                    samples_per_pixel: 10,
+                    samples_per_pixel: 3,
                 },
                 camera: Camera::new(
                     3.4,
@@ -122,13 +121,13 @@ mod tests {
                 )
             },
             sampler_descriptor: SamplerDescriptor {
-                num_threads: 8,
+                num_threads: 4,
                 in_buffer_size: 4096,
                 feedback_buffer_size: 2048,
                 out_buffer_size: 10240,
-                max_bounces: 10
+                max_bounces: 10,
             },
-            progressbar: true,
+            progressbar: false,
         });
         let image = instance.begin(world).await.expect("failed to join render thread");
         image.save("output/pipelined_render_test.png");

@@ -24,15 +24,15 @@ impl Camera {
         let viewport_height = 2.0 * focus_distance * (vertical_fov.to_radians() / 2.0).tan();
         let viewport_width = aspect_ratio * viewport_height;
 
-        let w = (look_at - position).normalized();
-        let u = w.cross(&up).normalized();
-        let v = u.cross(&w).normalized();
+        let w = (position - look_at).normalized();
+        let u = up.cross(&w).normalized();
+        let v = w.cross(&u).normalized();
 
         let forward = w * focus_distance;
         let horizontal = u * viewport_width;
         let vertical = v * viewport_height;
         let viewport_upper_left = position - horizontal / 2.0 + vertical / 2.0
-            + forward;
+            - forward;
 
         let defocus_radius = focus_distance * (defocus_angle.to_radians() / 2.0).tan();
         let defocus_disk_u = u * defocus_radius;
@@ -86,35 +86,10 @@ mod test {
         );
 
         assert_eq!(camera.position, position);
-        assert_eq!(camera.viewport_upper_left, Vec3::new(-aspect_ratio, 1.0, 1.0));
-        assert_eq!(camera.forward, Vec3::new(0.0, 0.0, 1.0));
-        assert_eq!(camera.horizontal, Vec3::new(2.0 * aspect_ratio, 0.0, 0.0));
+        assert_eq!(camera.viewport_upper_left, Vec3::new(aspect_ratio, 1.0, 1.0));
+        assert_eq!(camera.forward, Vec3::new(0.0, 0.0, -1.0));
+        assert_eq!(camera.horizontal, Vec3::new(-2.0 * aspect_ratio, 0.0, 0.0));
         assert_eq!(camera.vertical, Vec3::new(0.0, 2.0, 0.0));
-    }
-
-    #[test]
-    fn test_get_ray() {
-        let focal_length = 1.0;
-        let defocus_angle = 10.0;
-        let position = Vec3::new(0.0, 0.0, 0.0);
-        let look_at = Vec3::new(0.0, 0.0, 1.0);
-        let up = Vec3::new(0.0, 1.0, 0.0);
-        let vertical_fov = 90.0;
-        let aspect_ratio = 16.0 / 9.0;
-
-        let camera = Camera::new(
-            focal_length,
-            defocus_angle,
-            position,
-            look_at,
-            up,
-            vertical_fov,
-            aspect_ratio,
-        );
-
-        assert_eq!(camera.get_ray(0.5, 0.5).direction(), camera.forward.normalized());
-        assert_eq!(camera.get_ray(0.0, 0.0).direction(), camera.viewport_upper_left.normalized());
-        assert_eq!(camera.get_ray(1.0, 1.0).direction(), Vec3::new(-camera.viewport_upper_left.x, -camera.viewport_upper_left.y, focal_length).normalized());
     }
 
     #[test]

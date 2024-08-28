@@ -19,16 +19,8 @@ impl Sphere {
             center,
             radius,
             bbox,
-            material: material.clone(),
+            material: material,
         }
-    }
-
-    pub fn center(&self) -> Vec3 {
-        self.center
-    }
-
-    pub fn radius(&self) -> Float {
-        self.radius
     }
 }
 

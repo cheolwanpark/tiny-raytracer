@@ -43,3 +43,4 @@ impl HitRecord {
 pub mod list;
 pub mod world;
 pub mod sphere;
+pub mod quad;
