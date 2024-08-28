@@ -1,6 +1,6 @@
 use std::{collections::HashMap, ops::Range, sync::Arc};
 
-use crate::{hittable::{list::HittableList, HitRecord, Hittable}, material::Material, ray::Ray, Float};
+use crate::{accel::cpu::{aabb::AABB, bvh::BVH}, hittable::{list::HittableList, HitRecord, Hittable}, material::Material, ray::Ray, Float};
 
 pub struct World {
     hittable_root: HittableList,
@@ -34,11 +34,19 @@ impl World {
             None
         }
     }
+
+    pub fn get_bvh(&self) -> BVH {
+        BVH::new(&self.hittable_root)
+    }
 }
 
 impl Hittable for World {
     fn hit(&self, ray: &Ray, t_range: Range<Float>) -> Option<HitRecord> {
         self.hittable_root.hit(ray, t_range)
+    }
+
+    fn bounding_box(&self) -> AABB {
+        self.hittable_root.bounding_box()
     }
 }
 

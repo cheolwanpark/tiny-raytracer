@@ -2,6 +2,7 @@
 #![allow(unused_imports)]
 
 pub type Float = f32;
+pub type Int = i32;
 pub use std::f32::consts as FloatConsts;
 
 pub mod utils;
@@ -11,5 +12,4 @@ pub mod material;
 pub mod math;
 pub mod ray;
 pub mod pipeline;
-
 pub mod accel;

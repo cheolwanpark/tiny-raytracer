@@ -1,6 +1,6 @@
-use std::ops::{
+use std::{fmt::Display, ops::{
     Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Range, Sub, SubAssign,
-};
+}};
 
 use rand::random;
 
@@ -188,6 +188,12 @@ impl IndexMut<usize> for Vec3 {
 impl From<Vec3> for Color {
     fn from(vec: Vec3) -> Color {
         Color::new(vec.x, vec.y, vec.z)
+    }
+}
+
+impl Display for Vec3 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}, {}, {})", self.x, self.y, self.z)
     }
 }
 

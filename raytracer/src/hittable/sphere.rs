@@ -1,20 +1,24 @@
 use std::{ops::Range, sync::Arc};
 
-use crate::{material::Material, math::vec3::Vec3, ray::Ray, Float};
+use crate::{accel::cpu::aabb::AABB, material::Material, math::vec3::Vec3, ray::Ray, Float};
 
 use super::{HitRecord, Hittable};
 
 pub struct Sphere {
     center: Vec3,
     radius: Float,
+    bbox: AABB,
     material: Arc<Box<dyn Material>>,
 }
 
 impl Sphere {
     pub fn new(center: Vec3, radius: Float, material: Arc<Box<dyn Material>>) -> Sphere {
+        let radius_vec = Vec3::new_diagonal(radius);
+        let bbox = AABB::new(center - radius_vec, center + radius_vec);
         Sphere {
             center,
             radius,
+            bbox,
             material: material.clone(),
         }
     }
@@ -54,6 +58,10 @@ impl Hittable for Sphere {
             p - self.center,
             self.material.clone(),
         ))
+    }
+
+    fn bounding_box(&self) -> AABB {
+        self.bbox
     }
 }
 

@@ -1,9 +1,11 @@
 use std::{ops::Range, sync::Arc};
 
-use crate::{material::Material, math::vec3::Vec3, ray::Ray, Float};
+use crate::{accel::cpu::aabb::AABB, material::Material, math::vec3::Vec3, ray::Ray, Float};
 
 pub trait Hittable {
     fn hit(&self, ray: &Ray, t_range: Range<Float>) -> Option<HitRecord>;
+
+    fn bounding_box(&self) -> AABB;
 }
 
 pub struct HitRecord {

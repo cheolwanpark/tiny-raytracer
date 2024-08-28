@@ -2,7 +2,7 @@ use std::sync::{atomic::{AtomicBool, Ordering}, Arc};
 use tokio::task::JoinHandle;
 use flume::{bounded, Receiver, Sender};
 
-use crate::{camera::Camera, math::vec3::Vec3, utils::random::random_float, Float};
+use crate::{camera::Camera, math::vec3::Vec3, utils::random::random, Float};
 
 use super::{descriptor::SamplePointGeneratorDescriptor, dto::SamplePoint};
 
@@ -45,8 +45,8 @@ impl SamplePointGenerator {
                 for y in cols_beg..cols_end {
                     for x in 0..width {
                         for _ in 0..samples_per_pixel {
-                            let u = (x as Float + random_float()) / (width - 1) as Float;
-                            let v = (y as Float + random_float()) / (height - 1) as Float;
+                            let u = (x as Float + random::<Float>()) / (width - 1) as Float;
+                            let v = (y as Float + random::<Float>()) / (height - 1) as Float;
                             let ray = camera.get_ray(u, v);
                             sender.send_async(SamplePoint {
                                 x, 

@@ -1,22 +1,29 @@
-use std::ops::Range;
+use std::{ops::Range, sync::Arc};
 
-use crate::{ray::Ray, Float};
+use crate::{accel::cpu::{aabb::AABB, bvh::BVH}, ray::Ray, Float};
 
 use super::{HitRecord, Hittable};
 
 pub struct HittableList {
-    objects: Vec<Box<dyn Hittable>>,
+    objects: Vec<Arc<Box<dyn Hittable>>>,
+    bbox: Option<AABB>,
 }
 
 impl HittableList {
     pub fn new() -> HittableList {
         HittableList {
             objects: Vec::new(),
+            bbox: None,
         }
     }
 
     pub fn push(&mut self, object: Box<dyn Hittable>) {
-        self.objects.push(object);
+        if let Some(bbox) = self.bbox {
+            self.bbox = Some(AABB::merge(bbox, object.bounding_box()));
+        } else {
+            self.bbox = Some(object.bounding_box());
+        }
+        self.objects.push(Arc::new(object));
     }
 }
 
@@ -33,5 +40,16 @@ impl Hittable for HittableList {
         }
 
         hit_record
+    }
+
+    fn bounding_box(&self) -> AABB {
+        self.bbox.unwrap_or_default()
+    }
+}
+
+impl BVH {
+    pub fn new(list: &HittableList) -> Self {
+        let mut objects = list.objects.clone();
+        Self::new_with_mut_slice(&mut objects)
     }
 }

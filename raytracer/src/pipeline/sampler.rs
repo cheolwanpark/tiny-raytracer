@@ -4,7 +4,7 @@ use std::{future::Future, sync::{atomic::{AtomicBool, Ordering}, Arc}, time::Dur
 use tokio::{task::{yield_now, JoinHandle}, time::{sleep, timeout}};
 use flume::{bounded, Receiver, Sender};
 
-use crate::{hittable::{world::World, Hittable}, math::vec3::Vec3, Float};
+use crate::{accel::cpu::bvh::BVH, hittable::{world::World, Hittable}, math::vec3::Vec3, Float};
 
 use super::{descriptor::SamplerDescriptor, dto::{SamplePoint, SampledColor, SamplerInput}};
 
@@ -45,6 +45,8 @@ impl Sampler {
         let num_threads = self.descriptor.num_threads;
         let (tx_converted, rx_converted) = bounded(self.descriptor.in_buffer_size);
         let (tx_feedback, rx_feedback) = bounded(self.descriptor.feedback_buffer_size);
+
+        let world = Arc::new(world.get_bvh());
 
         let converter_handles: Vec<JoinHandle<()>> = (0..(num_threads+1)).map(|_| {
             let tx_converted = tx_converted.clone();
@@ -120,10 +122,10 @@ impl Sampler {
         }
     }
     
-    fn sample(world: Arc<World>, sample_point: SamplerInput) -> SamplingOutput {
+    fn sample(world: Arc<BVH>, sample_point: SamplerInput) -> SamplingOutput {
         let x = sample_point.x;
         let y = sample_point.y;
-
+        
         if sample_point.remain_bounces == 0 {
             SamplingOutput::Done(SampledColor { x, y, color: Vec3::zero() })
         }

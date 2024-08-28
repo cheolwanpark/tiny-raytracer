@@ -1,4 +1,4 @@
-use crate::{hittable::HitRecord, math::vec3::Vec3, utils::random::random_float, ray::Ray, Float};
+use crate::{hittable::HitRecord, math::vec3::Vec3, utils::random::random, ray::Ray, Float};
 
 use super::Material;
 
@@ -34,7 +34,7 @@ impl Material for Dielectric {
 
         let total_reflection = refraction_index * sin > 1.0;
         let reflectance = Self::reflectance(cos, refraction_index);
-        let direction = if total_reflection || reflectance > random_float() {
+        let direction = if total_reflection || reflectance > random() {
             ray.direction().reflect(&hit_record.normal)
         } else {
             ray.direction().refract(hit_record.normal, refraction_index)
