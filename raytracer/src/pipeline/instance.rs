@@ -126,6 +126,7 @@ mod tests {
                 feedback_buffer_size: 2048,
                 out_buffer_size: 10240,
                 max_bounces: 10,
+                background_color: Vec3::new(0.7, 0.8, 1.0),
             },
             progressbar: false,
         });

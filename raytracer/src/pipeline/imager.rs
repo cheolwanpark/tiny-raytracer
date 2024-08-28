@@ -54,7 +54,9 @@ impl Imager {
                 let y = sampled_color.y;
                 let idx = y*width + x;
                 pixels[idx] += sampled_color.color * color_divisor;
-                num_acc_cnt[idx] += 1;
+                if !sampled_color.emitted {
+                    num_acc_cnt[idx] += 1;
+                }
                 if num_acc_cnt[idx] == samples_per_pixel {
                     image.set_pixel(x, y, pixels[idx].into());
                     if let Some(progressbar) = self.progressbar.clone() {
@@ -116,6 +118,7 @@ mod tests {
                         tx.send_async(SampledColor {
                             x,
                             y,
+                            emitted: false,
                             color: Vec3::new(color_x, 0.0, 0.0),
                         }).await.expect("failed to send color data");
                     }

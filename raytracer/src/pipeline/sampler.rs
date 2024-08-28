@@ -12,8 +12,8 @@ use super::{descriptor::SamplerDescriptor, dto::{SamplePoint, SampledColor, Samp
 pub struct Sampler {
     descriptor: SamplerDescriptor,
 }
-pub enum SamplingOutput {
-    Continue(SamplerInput),
+enum SamplingOutput {
+    Continue(SamplerInput, Option<SampledColor>),
     Done(SampledColor),
 }
 
@@ -86,15 +86,20 @@ impl Sampler {
             let rx_in = rx_converted.clone();
             let tx_feedback = tx_feedback.clone();
             let tx_out = out_channel.clone();
+            let bg_color = self.descriptor.background_color;
             
             tokio::spawn(async move {
                 loop {
                     if let Ok(r) = timeout(Duration::from_millis(10), rx_in.recv_async()).await {
                     if let Ok(sampler_input) = r {
-                        match Sampler::sample(world.clone(), sampler_input) {
-                            SamplingOutput::Continue(sample_point) => {
+                        match Sampler::sample(world.clone(), sampler_input, bg_color) {
+                            SamplingOutput::Continue(sample_point, emitted) => {
                                 tx_feedback.send_async(sample_point).await
                                 .expect("failed to send feedback sampler input");
+                                if let Some(sampled_color) = emitted {
+                                    tx_out.send_async(sampled_color).await
+                                    .expect("failed to send emitted sampled color");
+                                }
                             },
                             SamplingOutput::Done(sampled_color) => {
                                 tx_out.send_async(sampled_color).await
@@ -122,31 +127,45 @@ impl Sampler {
         }
     }
     
-    fn sample(world: Arc<BVH>, sample_point: SamplerInput) -> SamplingOutput {
+    fn sample(world: Arc<BVH>, sample_point: SamplerInput, bg_color: Vec3) -> SamplingOutput {
         let x = sample_point.x;
         let y = sample_point.y;
         
         if sample_point.remain_bounces == 0 {
-            SamplingOutput::Done(SampledColor { x, y, color: Vec3::zero() })
+            SamplingOutput::Done(SampledColor { x, y, emitted: false, color: Vec3::zero() })
         }
         else if let Some(rec) = world.hit(&sample_point.ray, 0.001..Float::INFINITY) {
             if let Some((ray, attenuation)) = rec.material.scatter(&sample_point.ray, &rec) {
-                SamplingOutput::Continue(SamplerInput {
+                SamplingOutput::Continue(
+                    SamplerInput {
                     x, y,
                     ray,
                     remain_bounces: sample_point.remain_bounces - 1,
                     attenuation: sample_point.attenuation * attenuation
-                })
+                    },
+                    if let Some(emitted) = rec.material.emitted() {
+                        Some(SampledColor {
+                            x, y,
+                            emitted: true,
+                            color: sample_point.attenuation * emitted,
+                        })
+                    } else {
+                        None
+                    }
+                )
             } else {
-                SamplingOutput::Done(SampledColor { x, y, color: Vec3::zero() })
+                let emitted = rec.material.emitted().unwrap_or(Vec3::zero());
+                SamplingOutput::Done(SampledColor { 
+                    x, y, 
+                    emitted: false,
+                    color: sample_point.attenuation * emitted,
+                })
             }
         } else {
-            let direction = sample_point.ray.direction();
-            let a = 0.5 * (direction.y + 1.0);
-            let attenuation = (1.0 - a) * Vec3::new(1.0, 1.0, 1.0) + a * Vec3::new(0.5, 0.7, 1.0);
             SamplingOutput::Done(SampledColor {
                 x, y,
-                color: sample_point.attenuation * attenuation
+                emitted: false,
+                color: sample_point.attenuation * bg_color,
             })
         }
     }
@@ -204,7 +223,8 @@ mod tests {
             in_buffer_size: num_samples,
             feedback_buffer_size: num_samples,
             out_buffer_size: num_samples,
-            max_bounces: 2
+            max_bounces: 2,
+            background_color: Vec3::zero(),
         });
 
         let (sampler_handle, color_rx) = sampler.begin(world, rx);

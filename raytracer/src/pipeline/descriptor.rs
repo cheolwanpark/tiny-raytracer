@@ -1,4 +1,4 @@
-use crate::{camera::Camera, hittable::world::World};
+use crate::{camera::Camera, hittable::world::World, math::vec3::Vec3};
 
 #[derive(Clone)]
 pub struct ImageDescriptor {
@@ -21,6 +21,7 @@ pub struct SamplerDescriptor {
     pub feedback_buffer_size: usize,
     pub out_buffer_size: usize,
     pub max_bounces: usize,
+    pub background_color: Vec3,
 }
 
 pub struct InstanceDescriptor {

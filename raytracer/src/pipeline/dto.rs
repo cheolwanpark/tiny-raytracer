@@ -17,5 +17,6 @@ pub struct SamplerInput {
 pub struct SampledColor {
     pub x: usize,
     pub y: usize,
+    pub emitted: bool,
     pub color: Vec3,
 }
