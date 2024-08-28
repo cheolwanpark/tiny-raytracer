@@ -7,29 +7,36 @@ pub struct Camera {
     forward: Vec3,
     horizontal: Vec3,
     vertical: Vec3,
+    defocus_disk_u: Vec3,
+    defocus_disk_v: Vec3,
 }
 
 impl Camera {
     pub fn new(
-        focal_length: Float,
+        focus_distance: Float,
+        defocus_angle: Float,
         position: Vec3,
         look_at: Vec3,
         up: Vec3,
         vertical_fov: Float,
         aspect_ratio: Float,
     ) -> Camera {
-        let viewport_height = 2.0 * focal_length * (vertical_fov.to_radians() / 2.0).tan();
+        let viewport_height = 2.0 * focus_distance * (vertical_fov.to_radians() / 2.0).tan();
         let viewport_width = aspect_ratio * viewport_height;
 
         let w = (look_at - position).normalized();
         let u = up.cross(&w).normalized();
         let v = w.cross(&u).normalized();
 
-        let forward = w * focal_length;
+        let forward = w * focus_distance;
         let horizontal = u * viewport_width;
         let vertical = v * viewport_height;
         let viewport_upper_left = position - horizontal / 2.0 + vertical / 2.0
             + forward;
+
+        let defocus_radius = focus_distance * (defocus_angle.to_radians() / 2.0).tan();
+        let defocus_disk_u = u * defocus_radius;
+        let defocus_disk_v = v * defocus_radius;
 
         Camera {
             position,
@@ -37,14 +44,18 @@ impl Camera {
             forward,
             horizontal,
             vertical,
+            defocus_disk_u,
+            defocus_disk_v,
         }
     }
 
     pub fn get_ray(&self, u: Float, v: Float) -> Ray {
+        let p = Vec3::new_random_in_unit_disk();
+        let origin = self.position + p[0]*self.defocus_disk_u + p[1]*self.defocus_disk_v;
         Ray::new(
-            self.position,
+            origin,
             self.viewport_upper_left + (u * self.horizontal) - (v * self.vertical)
-                - self.position,
+                - origin,
         )
     }
 }
@@ -57,6 +68,7 @@ mod test {
     #[test]
     fn test_new() {
         let focal_length = 1.0;
+        let defocus_angle = 10.0;
         let position = Vec3::new(0.0, 0.0, 0.0);
         let look_at = Vec3::new(0.0, 0.0, 1.0);
         let up = Vec3::new(0.0, 1.0, 0.0);
@@ -65,6 +77,7 @@ mod test {
 
         let camera = Camera::new(
             focal_length,
+            defocus_angle,
             position,
             look_at,
             up,
@@ -82,6 +95,7 @@ mod test {
     #[test]
     fn test_get_ray() {
         let focal_length = 1.0;
+        let defocus_angle = 10.0;
         let position = Vec3::new(0.0, 0.0, 0.0);
         let look_at = Vec3::new(0.0, 0.0, 1.0);
         let up = Vec3::new(0.0, 1.0, 0.0);
@@ -90,6 +104,7 @@ mod test {
 
         let camera = Camera::new(
             focal_length,
+            defocus_angle,
             position,
             look_at,
             up,
@@ -108,6 +123,7 @@ mod test {
         let mut image = Image::new(800, 450);
         let camera = Camera::new(
             1.0,
+            10.0,
             Vec3::new(0.0, 0.0, 0.0),
             Vec3::new(0.0, 0.0, 1.0),
             Vec3::new(0.0, 1.0, 0.0),

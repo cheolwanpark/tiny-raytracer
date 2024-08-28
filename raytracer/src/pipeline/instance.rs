@@ -54,7 +54,7 @@ impl Instance {
 
 #[cfg(test)]
 mod tests {
-    use crate::{camera::Camera, hittable::{sphere::Sphere, world::World}, material::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal}, math::vec3::Vec3, pipeline::descriptor::{ImageDescriptor, SamplePointGeneratorDescriptor, SamplerDescriptor}};
+    use crate::{camera::Camera, hittable::{sphere::Sphere, world::World}, material::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal}, math::vec3::Vec3, pipeline::descriptor::{ImageDescriptor, SamplePointGeneratorDescriptor, SamplerDescriptor}, Float};
 
     use super::*;
 
@@ -100,22 +100,25 @@ mod tests {
     async fn test_dummy_scene_rendering() {
         println!("using {} worker threads", tokio::runtime::Handle::current().metrics().num_workers());
         let world = dummy_world();
+        let width = 800;
+        let height = 450;
         let instance = Instance::new(InstanceDescriptor {
             point_generator_descriptor: SamplePointGeneratorDescriptor {
                 num_threads: 2,
                 buffer_size: 2048,
                 image: ImageDescriptor {
-                    width: 640,
-                    height: 480,
-                    samples_per_pixel: 50,
+                    width: width,
+                    height: height,
+                    samples_per_pixel: 10,
                 },
                 camera: Camera::new(
-                    1.0,
-                    Vec3::zero(),
+                    3.4,
+                    10.0,
+                    Vec3::new(-2.0, 2.0, 1.0),
                     Vec3::new(0.0, 0.0, -1.0),
                     Vec3::new(0.0, 1.0, 0.0),
-                    90.0,
-                    100.0 / 100.0,
+                    20.0,
+                    width as Float / height as Float,
                 )
             },
             sampler_descriptor: SamplerDescriptor {

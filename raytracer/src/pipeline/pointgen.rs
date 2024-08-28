@@ -88,6 +88,7 @@ mod tests {
             },
             camera: Camera::new(
                 1.0,
+                10.0,
                 Vec3::zero(),
                 Vec3::new(0.0, 0.0, -1.0),
                 Vec3::new(0.0, 1.0, 0.0),
