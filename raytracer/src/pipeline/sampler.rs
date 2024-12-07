@@ -4,7 +4,7 @@ use std::{future::Future, sync::{atomic::{AtomicBool, Ordering}, Arc}, time::Dur
 use tokio::{task::{yield_now, JoinHandle}, time::{sleep, timeout}};
 use flume::{bounded, Receiver, Sender};
 
-use crate::{accel::cpu::bvh::BVH, hittable::{world::World, Hittable}, math::vec3::Vec3, Float};
+use crate::{accel::bvh::BVH, hittable::{world::World, Hittable}, math::vec3::Vec3, Float};
 
 use super::{descriptor::SamplerDescriptor, dto::{SamplePoint, SampledColor, SamplerInput}};
 

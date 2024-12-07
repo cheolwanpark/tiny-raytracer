@@ -1,6 +1,6 @@
 use std::{ops::Range, sync::Arc};
 
-use crate::{accel::cpu::{aabb::AABB, bvh::BVH}, ray::Ray, Float};
+use crate::{accel::{aabb::AABB, bvh::BVH}, ray::Ray, Float};
 
 use super::{HitRecord, Hittable};
 

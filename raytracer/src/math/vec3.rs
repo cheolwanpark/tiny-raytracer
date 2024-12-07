@@ -6,6 +6,7 @@ use rand::random;
 
 use crate::{utils::image::Color, Float, FloatConsts};
 
+#[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Vec3 {
     pub x: Float,

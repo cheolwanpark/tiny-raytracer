@@ -2,6 +2,7 @@ use std::{cmp::Ordering, mem::swap, ops::Range};
 
 use crate::{math::vec3::Vec3, ray::Ray, Float, Int};
 
+#[repr(C)]
 #[derive(Clone, Copy)]
 pub struct AABB {
     min: Vec3,

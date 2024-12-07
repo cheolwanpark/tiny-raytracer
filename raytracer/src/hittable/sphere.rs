@@ -1,14 +1,14 @@
 use std::{ops::Range, sync::Arc};
 
-use crate::{accel::cpu::aabb::AABB, material::Material, math::vec3::Vec3, ray::Ray, Float};
+use crate::{accel::aabb::AABB, material::Material, math::vec3::Vec3, ray::Ray, Float};
 
 use super::{HitRecord, Hittable};
 
 pub struct Sphere {
-    center: Vec3,
-    radius: Float,
+    pub center: Vec3,
+    pub radius: Float,
     bbox: AABB,
-    material: Arc<Box<dyn Material>>,
+    pub material: Arc<Box<dyn Material>>,
 }
 
 impl Sphere {

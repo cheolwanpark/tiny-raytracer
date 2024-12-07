@@ -1,18 +1,18 @@
 use std::{ops::Range, sync::Arc};
 
-use crate::{accel::cpu::aabb::AABB, material::Material, math::vec3::Vec3, ray::Ray, Float};
+use crate::{accel::aabb::AABB, material::Material, math::vec3::Vec3, ray::Ray, Float};
 
 use super::{HitRecord, Hittable};
 
 pub struct Quad {
-    corner: Vec3,
-    u: Vec3,
-    v: Vec3,
+    pub corner: Vec3,
+    pub u: Vec3,
+    pub v: Vec3,
+    pub n: Vec3,
+    pub w: Vec3,
+    pub d: Float,
     bbox: AABB,
-    material: Arc<Box<dyn Material>>,
-    n: Vec3,
-    w: Vec3,
-    d: Float,
+    pub material: Arc<Box<dyn Material>>,
 }
 
 impl Quad {
@@ -24,7 +24,7 @@ impl Quad {
         let n = u.cross(&v);
         let w = n / n.dot(&n);
         let d = n.dot(&corner);
-        Self { corner, u, v, bbox, material, n, w, d } 
+        Self { corner, u, v, n, w, d, bbox, material } 
     }
 }
 

@@ -1,6 +1,6 @@
 use std::{collections::HashMap, ops::Range, sync::Arc};
 
-use crate::{accel::cpu::{aabb::AABB, bvh::BVH}, hittable::{list::HittableList, HitRecord, Hittable}, material::Material, ray::Ray, Float};
+use crate::{accel::{aabb::AABB, bvh::BVH}, hittable::{list::HittableList, HitRecord, Hittable}, material::Material, ray::Ray, Float};
 
 pub struct World {
     hittable_root: HittableList,
