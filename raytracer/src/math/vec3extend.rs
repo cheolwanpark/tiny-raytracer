@@ -1,4 +1,4 @@
-use crate::{utils::random::random_range, Float};
+use crate::{utils::random::{random, random_range}, Float};
 use std::ops::Range;
 
 use super::vec3::Vec3;
@@ -13,12 +13,20 @@ impl Vec3 {
     }
 
     pub fn new_random_in_unit_sphere() -> Self {
-        let range = Float::from(-1.0)..Float::from(1.0);
-        let mut p = Vec3::new_random_range(range.clone());
-        while p.squared_length() >= 1.0 {
-            p = Vec3::new_random_range(range.clone());
-        }
-        p
+        let u1: Float = random();
+        let u2: Float = random();
+        let u3: Float = random();
+        
+        let theta = 2.0 * std::f32::consts::PI * u1;
+        let phi = (1.0 - 2.0 * u2).acos(); // Invert to get uniform distribution
+        let r = u3.cbrt(); // Cube root for uniform distribution
+        
+        let sin_phi = phi.sin();
+        let x = r * sin_phi * theta.cos();
+        let y = r * sin_phi * theta.sin();
+        let z = r * phi.cos();
+        
+        Vec3::new(x, y, z)
     }
 
     pub fn new_random_unit_vector() -> Self {
