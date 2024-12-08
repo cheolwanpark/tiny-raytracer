@@ -51,6 +51,14 @@ impl Image {
         (self.width, self.height)
     }
 
+    pub fn width(&self) -> usize {
+        self.width
+    }
+
+    pub fn height(&self) -> usize {
+        self.height
+    }
+
     pub fn aspect_ratio(&self) -> Float {
         self.width as Float / self.height as Float
     }

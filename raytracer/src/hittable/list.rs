@@ -1,8 +1,8 @@
 use std::{ops::Range, sync::Arc};
 
-use crate::{accel::{aabb::AABB, bvh::BVH}, ray::Ray, Float};
+use crate::{ray::Ray, Float};
 
-use super::{HitRecord, Hittable};
+use super::{aabb::AABB, bvh::BVH, HitRecord, Hittable};
 
 pub struct HittableList {
     objects: Vec<Arc<Box<dyn Hittable>>>,

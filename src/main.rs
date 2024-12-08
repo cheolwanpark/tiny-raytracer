@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
-use raytracer::{camera::Camera, hittable::{list::HittableList, quad::Quad, world::World}, material::{lambertian::Lambertian, light::Light, Material}, math::vec3::Vec3, pipeline::{descriptor::{ImageDescriptor, InstanceDescriptor, SamplePointGeneratorDescriptor, SamplerDescriptor}, instance::Instance}};
+use raytracer::{camera::Camera, hittable::{list::HittableList, quad::Quad, world::World}, material::{lambertian::Lambertian, light::Light, Material}, math::vec3::Vec3, renderer::Renderer};
 
-#[tokio::main(flavor = "multi_thread", worker_threads=10)]
+#[tokio::main(flavor = "multi_thread", worker_threads=8)]
 async fn main() {
     let world = Arc::new(build_world());
     let camera = Camera::new(
@@ -12,31 +12,11 @@ async fn main() {
         Vec3::new(50.0, 50.0, 0.0),
         Vec3::new(0.0, 1.0, 0.0),
         40.0,
-        1.0,
+        300, 300,
     );
-    let instance = Instance::new(InstanceDescriptor {
-        point_generator_descriptor: SamplePointGeneratorDescriptor {
-            num_threads: 1,
-            buffer_size: 4096,
-            image: ImageDescriptor {
-                width: 1000,
-                height: 1000,
-                samples_per_pixel: 100,
-            },
-            camera,
-        },
-        sampler_descriptor: SamplerDescriptor {
-            num_threads: 10,
-            in_buffer_size: 4096,
-            feedback_buffer_size: 20480,
-            out_buffer_size: 20480,
-            max_bounces: 50,
-            background_color: Vec3::zero(),
-        },
-        progressbar: true
-    });
+    let instance = Renderer::new(500, 6, 15, true, None);
 
-    let image = instance.begin(world).await.expect("failed to generate image");
+    let image = instance.render(camera, world).await.expect("failed to generate image");
     image.save("output/output.png");
 }
 

@@ -1,8 +1,8 @@
 use std::{ops::Range, sync::Arc};
 
-use crate::{accel::aabb::AABB, material::Material, math::vec3::Vec3, ray::Ray, Float};
+use crate::{material::Material, math::vec3::Vec3, ray::Ray, Float};
 
-use super::{HitRecord, Hittable};
+use super::{aabb::AABB, HitRecord, Hittable};
 
 pub struct Quad {
     pub corner: Vec3,
@@ -59,7 +59,7 @@ impl Hittable for Quad {
 
 #[cfg(test)]
 mod tests {
-    use crate::{camera::Camera, hittable::world::World, material::lambertian::Lambertian, pipeline::{descriptor::{ImageDescriptor, InstanceDescriptor, SamplePointGeneratorDescriptor, SamplerDescriptor}, instance::Instance}};
+    use crate::{camera::Camera, hittable::world::World, material::lambertian::Lambertian, renderer::Renderer};
 
     use super::*;
 
@@ -136,35 +136,16 @@ mod tests {
             world.get_material("teal").unwrap()
         )));
 
-        let instance = Instance::new(InstanceDescriptor {
-            point_generator_descriptor: SamplePointGeneratorDescriptor {
-                num_threads: 1,
-                buffer_size: 1024,
-                image: ImageDescriptor {
-                    width: 400,
-                    height: 300,
-                    samples_per_pixel: 10,
-                },
-                camera: Camera::new(
-                    1.0,
-                    0.0,
-                    Vec3::new(0.0, 0.0, 9.0),
-                    Vec3::zero(),
-                    Vec3::new(0.0, 1.0, 0.0),
-                    80.0,
-                    400.0 / 300.0
-                ),
-            },
-            sampler_descriptor: SamplerDescriptor {
-                num_threads: 4,
-                in_buffer_size: 1024,
-                feedback_buffer_size: 4096,
-                out_buffer_size: 4096,
-                max_bounces: 10,
-                background_color: Vec3::new(0.7, 0.8, 1.0),
-            },
-            progressbar: false,
-        });
-        instance.begin(Arc::new(world)).await.expect("failed to create image").save("output/quad_test.png");
+        let camera = Camera::new(
+            1.0,
+            0.0,
+            Vec3::new(0.0, 0.0, 9.0),
+            Vec3::zero(),
+            Vec3::new(0.0, 1.0, 0.0),
+            80.0,
+            400, 300
+        );
+        let instance = Renderer::new(10, 4, 10, false, Some(Vec3::new(0.7, 0.8, 1.0)));
+        instance.render(camera, Arc::new(world)).await.expect("failed to create image").save("output/quad_test.png");
     }
 }

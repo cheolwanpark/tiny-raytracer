@@ -9,6 +9,8 @@ pub struct Camera {
     vertical: Vec3,
     defocus_disk_u: Vec3,
     defocus_disk_v: Vec3,
+    width: usize,
+    height: usize,
 }
 
 impl Camera {
@@ -19,9 +21,11 @@ impl Camera {
         look_at: Vec3,
         up: Vec3,
         vertical_fov: Float,
-        aspect_ratio: Float,
+        width: usize,
+        height: usize,
     ) -> Camera {
         let viewport_height = 2.0 * focus_distance * (vertical_fov.to_radians() / 2.0).tan();
+        let aspect_ratio = width as Float / height as Float;
         let viewport_width = aspect_ratio * viewport_height;
 
         let w = (position - look_at).normalized();
@@ -46,6 +50,8 @@ impl Camera {
             vertical,
             defocus_disk_u,
             defocus_disk_v,
+            width,
+            height,
         }
     }
 
@@ -57,6 +63,10 @@ impl Camera {
             self.viewport_upper_left + (u * self.horizontal) - (v * self.vertical)
                 - origin,
         )
+    }
+
+    pub fn get_image_size(&self) -> (usize, usize) {
+        (self.width, self.height)
     }
 }
 
@@ -73,7 +83,9 @@ mod test {
         let look_at = Vec3::new(0.0, 0.0, 1.0);
         let up = Vec3::new(0.0, 1.0, 0.0);
         let vertical_fov = 90.0;
-        let aspect_ratio = 16.0 / 9.0;
+        let width = 16;
+        let height = 9;
+        let aspect_ratio = width as Float / height as Float;
 
         let camera = Camera::new(
             focal_length,
@@ -82,7 +94,7 @@ mod test {
             look_at,
             up,
             vertical_fov,
-            aspect_ratio,
+            width, height
         );
 
         assert_eq!(camera.position, position);
@@ -96,6 +108,7 @@ mod test {
     #[ignore]
     fn test_ray_image_generation() {
         let mut image = Image::new(800, 450);
+        let (width, height) = image.size();
         let camera = Camera::new(
             1.0,
             10.0,
@@ -103,9 +116,8 @@ mod test {
             Vec3::new(0.0, 0.0, 1.0),
             Vec3::new(0.0, 1.0, 0.0),
             90.0,
-            image.aspect_ratio()
+            width, height
         );
-        let (width, height) = image.size();
         for j in 0..height {
             for i in 0..width {
                 let ray = camera.get_ray(i as Float / width as Float, j as Float / height as Float);
