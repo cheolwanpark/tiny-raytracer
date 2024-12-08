@@ -48,7 +48,7 @@ impl Renderer {
             self.background_color,
         );
         let progressbar = if self.progressbar {
-            Some(Arc::new(ProgressBar::new((width*height) as u64)))
+            Some(Box::new(ProgressBar::new((width*height) as u64)))
         } else {
             None
         };

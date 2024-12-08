@@ -81,7 +81,7 @@ impl Sampler {
             }
         }
 
-        SampledColor { x, y, emitted: false, color }
+        SampledColor { x, y, color }
     }
 }
 

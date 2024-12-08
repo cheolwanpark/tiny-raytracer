@@ -14,7 +14,7 @@ async fn main() {
         40.0,
         300, 300,
     );
-    let instance = Renderer::new(500, 6, 15, true, None);
+    let instance = Renderer::new(1000, 8, 20, true, None);
 
     let image = instance.render(camera, world).await.expect("failed to generate image");
     image.save("output/output.png");

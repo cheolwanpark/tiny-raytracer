@@ -9,7 +9,6 @@ use crate::{math::vec3::Vec3, utils::image::Image, Float};
 pub struct SampledColor {
     pub x: usize,
     pub y: usize,
-    pub emitted: bool,
     pub color: Vec3,
 }
 
@@ -17,7 +16,7 @@ pub struct Imager {
     width: usize,
     height: usize,
     samples_per_pixel: usize,
-    progressbar: Option<Arc<ProgressBar>>,
+    progressbar: Option<Box<ProgressBar>>,
 }
 
 impl Imager {
@@ -25,7 +24,7 @@ impl Imager {
         width: usize,
         height: usize,
         samples_per_pixel: usize,
-        progressbar: Option<Arc<ProgressBar>>
+        progressbar: Option<Box<ProgressBar>>
     ) -> Self {
         Self { width, height, samples_per_pixel, progressbar }
     }
@@ -47,9 +46,7 @@ impl Imager {
             let y = sampled_color.y;
             let idx = y*self.width + x;
             pixels[idx] += sampled_color.color * color_multiplier;
-            if !sampled_color.emitted {
-                num_acc_cnt[idx] += 1;
-            }
+            num_acc_cnt[idx] += 1;
             if num_acc_cnt[idx] == self.samples_per_pixel {
                 image.set_pixel(x, y, pixels[idx].into());
                 if let Some(progressbar) = self.progressbar.clone() {
@@ -85,7 +82,6 @@ mod tests {
                         tx.send_async(SampledColor {
                             x,
                             y,
-                            emitted: false,
                             color: Vec3::new(color_x, 0.0, 0.0),
                         }).await.expect("failed to send color data");
                     }
