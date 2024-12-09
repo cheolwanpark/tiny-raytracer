@@ -13,3 +13,6 @@ flume = "0.11.0"
 bytemuck = { version = "1.17.0", features = ["derive"] }
 tokio = { version = "1.39.3", features = ["rt", "rt-multi-thread", "macros", "time"] }
 metal = "0.30.0"
+
+[build-dependencies]
+glob = "0.3"

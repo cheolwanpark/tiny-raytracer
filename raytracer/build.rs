@@ -1,6 +1,7 @@
 use std::fs;
 use std::path::Path;
 use std::process::Command;
+use glob::glob;
 
 fn main() {
     let shader_dir_path = Path::new("src/renderer/sampler/metal/shader");
@@ -39,11 +40,11 @@ fn main() {
     if !status.success() {
         panic!("Removing the AIR file failed");
     }
-    Command::new("rm")
-        .current_dir(out_dir_path.to_str().unwrap())
-        .args(&["-f", "*.tmp"])
-        .status()
-        .expect("Failed to remove the AIR file");
+    for entry in glob(out_dir_path.join("*.air.tmp").to_str().unwrap()).unwrap() {
+        if let Ok(path) = entry {
+            fs::remove_file(&path).expect(&format!("Failed to remove temp file: {:?}", path));
+        }
+    }
 
     for entry in fs::read_dir(shader_dir_path.to_str().unwrap()).expect("Failed to read shader directory") {
         let entry = entry.expect("Failed to read directory entry");
