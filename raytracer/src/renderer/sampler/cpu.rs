@@ -4,44 +4,24 @@ use std::{future::Future, sync::{atomic::{AtomicBool, Ordering}, Arc}, time::Dur
 use tokio::{task::{yield_now, JoinHandle}, time::{sleep, timeout}};
 use flume::{bounded, Receiver, Sender};
 
-use crate::{hittable::{bvh::BVH, world::World, Hittable}, math::vec3::Vec3, Float};
+use crate::{hittable::{bvh::BVH, world::World, Hittable}, math::vec3::Vec3, renderer::{imager::SampledColor, pointgen::SamplePoint}, Float};
 
-use super::{imager::SampledColor, pointgen::SamplePoint};
+use super::Sampler;
 
 #[derive(Clone, Copy)]
-pub struct Sampler {
+pub struct CpuSampler {
     num_threads: usize,
     max_bounces: usize,
     background_color: Vec3,
 }
 
-impl Sampler {
+impl CpuSampler {
     pub fn new(
         num_threads: usize,
         max_bounces: usize,
         background_color: Vec3,
     ) -> Self {
         Self { num_threads, max_bounces, background_color }
-    }
-
-    pub async fn sampling(
-        self, 
-        world: &World,
-        in_channel: Receiver<SamplePoint>,
-        out_channel: Sender<SampledColor>,
-    ) {
-        let world = Arc::new(world.get_bvh());
-        let handles: Vec<JoinHandle<()>> = (0..self.num_threads).map(|_| {
-            let world = world.clone();
-            let in_channel = in_channel.clone();
-            let out_channel = out_channel.clone();
-            tokio::spawn(async move {
-                self.sampling_subthread(world, in_channel, out_channel).await;
-            })
-        }).collect();
-        for handle in handles {
-            handle.await.expect("failed to join sampling thread");
-        }
     }
 
     async fn sampling_subthread(
@@ -82,6 +62,28 @@ impl Sampler {
         }
 
         SampledColor { x, y, color }
+    }
+}
+
+impl Sampler for CpuSampler {
+    async fn sampling(
+        self, 
+        world: &World,
+        in_channel: Receiver<SamplePoint>,
+        out_channel: Sender<SampledColor>,
+    ) {
+        let world = Arc::new(world.get_bvh());
+        let handles: Vec<JoinHandle<()>> = (0..self.num_threads).map(|_| {
+            let world = world.clone();
+            let in_channel = in_channel.clone();
+            let out_channel = out_channel.clone();
+            tokio::spawn(async move {
+                self.sampling_subthread(world, in_channel, out_channel).await;
+            })
+        }).collect();
+        for handle in handles {
+            handle.await.expect("failed to join sampling thread");
+        }
     }
 }
 
@@ -134,7 +136,7 @@ mod tests {
         let (tx, rx) = bounded(num_samples);
         let (ctx, crx) = bounded(num_samples);
 
-        let sampler = Sampler::new(
+        let sampler = CpuSampler::new(
             1, 
             2, 
             Vec3::zero(),

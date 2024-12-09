@@ -6,7 +6,7 @@ use tokio::{self, task::JoinHandle};
 
 use crate::{camera::Camera, hittable::world::World, math::vec3::Vec3, utils::image::Image};
 
-use super::{imager::Imager, pointgen::SamplePointGenerator, sampler::Sampler};
+use super::{imager::Imager, pointgen::SamplePointGenerator, sampler::{CpuSampler, Sampler}};
 
 #[derive(Clone, Copy)]
 pub struct Renderer {
@@ -42,7 +42,7 @@ impl Renderer {
             self.samples_per_pixel,
             camera.clone()
         );
-        let sampler = Sampler::new(
+        let sampler = CpuSampler::new(
             self.num_sampler_threads,
             self.max_bounces,
             self.background_color,
@@ -146,6 +146,6 @@ mod tests {
             Some(Vec3::new(0.7, 0.8, 1.0))
         );
         let image = instance.render(camera, world).await.expect("failed to join render thread");
-        image.save("output/pipelined_render_test.png");
+        image.save("output/render_test.png");
     }
 }

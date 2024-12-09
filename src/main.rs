@@ -14,7 +14,7 @@ async fn main() {
         40.0,
         300, 300,
     );
-    let instance = Renderer::new(1000, 8, 20, true, None);
+    let instance = Renderer::new(300, 8, 20, true, Some(Vec3::new_diagonal(0.001)));
 
     let image = instance.render(camera, world).await.expect("failed to generate image");
     image.save("output/output.png");
