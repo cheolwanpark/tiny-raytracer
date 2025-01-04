@@ -2,9 +2,9 @@ use std::{mem::transmute, sync::Arc};
 
 use metal::{AccelerationStructureBoundingBoxGeometryDescriptor, Buffer, Device, NSRange, NSUInteger};
 
-use crate::{hittable::{aabb::AABB, quad::Quad, Hittable}, material::Material, math::vec3::Vec3, Float};
+use crate::{hittable::{aabb::AABB, quad::Quad, Hittable}, material::Material, math::vec3::Vec3, renderer::sampler::metal::global_resource_option, Float};
 
-use super::MetalGeometry;
+use super::{masks::MetalGeometryMasks, MetalGeometry};
 
 #[repr(C)]
 struct MetalQuad {
@@ -51,7 +51,6 @@ impl MetalQuadGeometry {
     }
 }
 
-
 impl MetalGeometry for MetalQuadGeometry {
     fn upload_to_buffers(&mut self) {
         if self.quad_buffer.is_none() {
@@ -59,7 +58,7 @@ impl MetalGeometry for MetalQuadGeometry {
                 self.device.new_buffer_with_data(
                     transmute(self.quads.as_ptr()),
                     (self.quads.len() * size_of::<MetalQuad>()) as NSUInteger,
-                    self.get_resource_option())
+                    global_resource_option())
             });
             self.quad_buffer.as_ref().unwrap().set_label("quad buffer");
             self.quad_buffer.as_ref().unwrap().did_modify_range(
@@ -71,7 +70,7 @@ impl MetalGeometry for MetalQuadGeometry {
                 self.device.new_buffer_with_data(
                     transmute(self.bboxes.as_ptr()),
                     (self.bboxes.len() * size_of::<AABB>()) as NSUInteger,
-                    self.get_resource_option())
+                    global_resource_option())
             });
             self.bbox_buffer.as_ref().unwrap().set_label("bbox buffer");
             self.bbox_buffer.as_ref().unwrap().did_modify_range(
@@ -92,5 +91,9 @@ impl MetalGeometry for MetalQuadGeometry {
 
     fn get_intersection_function_name(&self) -> Option<&str> {
         Some("quadIntersectionFunction")
+    }
+
+    fn get_mask(&self) -> u32 {
+        MetalGeometryMasks::Quad.into()
     }
 }

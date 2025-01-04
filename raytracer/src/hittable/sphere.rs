@@ -4,6 +4,7 @@ use crate::{material::Material, math::vec3::Vec3, ray::Ray, Float};
 
 use super::{aabb::AABB, HitRecord, Hittable};
 
+#[derive(Clone)]
 pub struct Sphere {
     pub center: Vec3,
     pub radius: Float,

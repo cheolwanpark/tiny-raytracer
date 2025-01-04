@@ -1,5 +1,7 @@
 use std::{ops::Range, sync::Arc};
 
+use as_any::AsAny;
+
 use crate::{ray::Ray, Float};
 
 use super::{aabb::AABB, bvh::BVH, HitRecord, Hittable};
@@ -25,8 +27,14 @@ impl HittableList {
         }
         self.objects.push(Arc::new(object));
     }
+    
+    pub fn get_geometries<T: AsAny + Clone>(&self) -> Vec<T> {
+        self.objects.iter()
+                    .filter_map(|obj| obj.as_any().downcast_ref::<T>())
+                    .map(|rf| rf.clone())
+                    .collect()
+    }
 }
-
 impl Hittable for HittableList {
     fn hit(&self, ray: &Ray, t_range: Range<Float>) -> Option<HitRecord> {
         let mut hit_record = None;

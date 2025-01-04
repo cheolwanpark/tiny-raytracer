@@ -5,7 +5,7 @@ use flume::{Receiver, Sender};
 mod cpu;
 pub use cpu::CpuSampler;
 
-mod metal;
+pub mod metal;
 
 pub trait Sampler {
     fn sampling(

@@ -1,5 +1,7 @@
 use std::{ops::Range, sync::Arc};
 
+use as_any::AsAny;
+
 use crate::{material::Material, math::vec3::Vec3, ray::Ray, Float};
 
 pub mod list;
@@ -9,7 +11,7 @@ pub mod quad;
 pub mod aabb;
 pub mod bvh;
 
-pub trait Hittable {
+pub trait Hittable: AsAny {
     fn hit(&self, ray: &Ray, t_range: Range<Float>) -> Option<HitRecord>;
 
     fn bounding_box(&self) -> aabb::AABB;

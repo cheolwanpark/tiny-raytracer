@@ -1,8 +1,10 @@
 use std::{collections::HashMap, ops::Range, sync::Arc};
 
-use crate::{hittable::{list::HittableList, HitRecord, Hittable}, material::Material, ray::Ray, Float};
+use metal::Device;
 
-use super::{aabb::AABB, bvh::BVH};
+use crate::{hittable::{list::HittableList, HitRecord, Hittable}, material::Material, ray::Ray, renderer::sampler::metal::geometry::{quad::MetalQuadGeometry, sphere::MetalSphereGeometry, MetalGeometry}, Float};
+
+use super::{aabb::AABB, bvh::BVH, quad::Quad, sphere::Sphere};
 
 pub struct World {
     hittable_root: HittableList,
@@ -39,6 +41,15 @@ impl World {
 
     pub fn get_bvh(&self) -> BVH {
         BVH::new(&self.hittable_root)
+    }
+
+    pub fn get_metal_geometries(&self, device: Device) -> Vec<Box<dyn MetalGeometry>> {
+        let quads = self.hittable_root.get_geometries::<Quad>();
+        let spheres = self.hittable_root.get_geometries::<Sphere>();
+        vec![
+            Box::new(MetalQuadGeometry::new(device.clone(), quads)),
+            Box::new(MetalSphereGeometry::new(device, spheres))
+        ]
     }
 }
 

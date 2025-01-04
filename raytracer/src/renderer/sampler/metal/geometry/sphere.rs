@@ -2,9 +2,9 @@ use std::{mem::transmute, sync::Arc};
 
 use metal::{AccelerationStructureBoundingBoxGeometryDescriptor, Buffer, Device, MTLResourceOptions, NSRange, NSUInteger};
 
-use crate::{hittable::{aabb::AABB, sphere::Sphere, Hittable}, material::Material, math::vec3::Vec3, Float};
+use crate::{hittable::{aabb::AABB, sphere::Sphere, Hittable}, material::Material, math::vec3::Vec3, renderer::sampler::metal::global_resource_option, Float};
 
-use super::MetalGeometry;
+use super::{masks::MetalGeometryMasks, MetalGeometry};
 
 #[repr(C)]
 struct MetalSphere {
@@ -50,7 +50,7 @@ impl MetalGeometry for MetalSphereGeometry {
                 self.device.new_buffer_with_data(
                     transmute(self.spheres.as_ptr()),
                     (self.spheres.len() * size_of::<MetalSphere>()) as NSUInteger,
-                    self.get_resource_option())
+                    global_resource_option())
             });
             self.sphere_buffer.as_ref().unwrap().set_label("sphere buffer");
             self.sphere_buffer.as_ref().unwrap().did_modify_range(
@@ -62,7 +62,7 @@ impl MetalGeometry for MetalSphereGeometry {
                 self.device.new_buffer_with_data(
                     transmute(self.bboxes.as_ptr()),
                     (self.bboxes.len() * size_of::<AABB>()) as NSUInteger,
-                    self.get_resource_option())
+                    global_resource_option())
             });
             self.bbox_buffer.as_ref().unwrap().set_label("bbox buffer");
             self.bbox_buffer.as_ref().unwrap().did_modify_range(
@@ -83,5 +83,9 @@ impl MetalGeometry for MetalSphereGeometry {
 
     fn get_intersection_function_name(&self) -> Option<&str> {
         Some("sphereIntersectionFunction")
+    }
+
+    fn get_mask(&self) -> u32 {
+        MetalGeometryMasks::Sphere.into()
     }
 }
