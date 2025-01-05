@@ -13,6 +13,7 @@ struct MetalSampler {
     device: Device,
     library: Library,
     comm_queue: CommandQueue,
+    pipeline: MetalRaytracingPipeline,
 }
 
 impl MetalSampler {
@@ -25,13 +26,14 @@ impl MetalSampler {
         .join("src/renderer/sampler/metal/shader.metallib");
         let library = device.new_library_with_file(lib_path).expect("failed to load meatallib");
         let comm_queue = device.new_command_queue();
-        MetalRaytracingPipeline::setup(&device, &library);
+        let pipeline = MetalRaytracingPipeline::setup(&device, &library);
         Self { 
             max_bounces, 
             background_color, 
             device, 
             library, 
-            comm_queue 
+            comm_queue,
+            pipeline,
         }
     }
 }
