@@ -6,7 +6,7 @@ use crate::hittable::world::World;
 
 use super::global_resource_option;
 
-struct MetalAccelerationStructure {
+pub struct MetalAccelerationStructure {
     instance: AccelerationStructure,
     primitive_structures: Vec<AccelerationStructure>,
     instance_descriptors: Vec<MTLAccelerationStructureInstanceDescriptor>,

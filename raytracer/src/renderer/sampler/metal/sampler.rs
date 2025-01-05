@@ -1,16 +1,18 @@
-use std::path::PathBuf;
+use std::{collections::BTreeMap, path::PathBuf};
 
 use flume::{Receiver, Sender};
-use metal::{CommandQueue, Device, Library};
+use metal::{CommandQueue, Device, Function, Library};
 
 use crate::{hittable::world::World, math::vec3::Vec3, renderer::{imager::SampledColor, pointgen::SamplePoint, sampler::Sampler}};
+
+use super::pipeline::MetalRaytracingPipeline;
 
 struct MetalSampler {
     max_bounces: usize,
     background_color: Vec3,
     device: Device,
     library: Library,
-    comm_queue: CommandQueue
+    comm_queue: CommandQueue,
 }
 
 impl MetalSampler {
@@ -23,7 +25,14 @@ impl MetalSampler {
         .join("src/renderer/sampler/metal/shader.metallib");
         let library = device.new_library_with_file(lib_path).expect("failed to load meatallib");
         let comm_queue = device.new_command_queue();
-        Self { max_bounces, background_color, device, library, comm_queue }
+        MetalRaytracingPipeline::setup(&device, &library);
+        Self { 
+            max_bounces, 
+            background_color, 
+            device, 
+            library, 
+            comm_queue 
+        }
     }
 }
 
@@ -34,6 +43,7 @@ impl Sampler for MetalSampler {
             in_channel: Receiver<SamplePoint>,
             out_channel: Sender<SampledColor>,
         ) {
+        // refer https://github.com/gfx-rs/metal-rs/blob/ef768ff9d742ae6a0f4e83ddc8031264e7d460c4/examples/raytracing/renderer.rs#L361
         unimplemented!()
     }
 }
