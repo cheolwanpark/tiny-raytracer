@@ -6,9 +6,11 @@ use tokio::task::JoinHandle;
 
 use crate::{math::vec3::Vec3, utils::image::Image, Float};
 
+#[repr(C)]
+#[derive(Clone, Copy)]
 pub struct SampledColor {
-    pub x: usize,
-    pub y: usize,
+    pub x: u32,
+    pub y: u32,
     pub color: Vec3,
 }
 
@@ -42,8 +44,8 @@ impl Imager {
         let mut num_acc_cnt = vec![0usize; self.width*self.height];
 
         while let Ok(sampled_color) = in_channel.recv_async().await {
-            let x = sampled_color.x;
-            let y = sampled_color.y;
+            let x = sampled_color.x as usize;
+            let y = sampled_color.y as usize;
             let idx = y*self.width + x;
             pixels[idx] += sampled_color.color * color_multiplier;
             num_acc_cnt[idx] += 1;
@@ -80,8 +82,8 @@ mod tests {
                     for _ in 0..samples_per_pixel {
                         let color_x = ((x+1)*(y+1)) as Float / (width*height) as Float;
                         tx.send_async(SampledColor {
-                            x,
-                            y,
+                            x: x as u32,
+                            y: y as u32,
                             color: Vec3::new(color_x, 0.0, 0.0),
                         }).await.expect("failed to send color data");
                     }

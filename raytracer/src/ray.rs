@@ -1,5 +1,8 @@
 use crate::{math::vec3::Vec3, Float};
 
+
+#[repr(C)]
+#[derive(Clone, Copy)]
 pub struct Ray {
     origin: Vec3,
     direction: Vec3,

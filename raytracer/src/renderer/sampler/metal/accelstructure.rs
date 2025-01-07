@@ -15,7 +15,7 @@ pub struct MetalAccelerationStructure {
 
 impl MetalAccelerationStructure {
     pub fn new(
-        world: World, 
+        world: &World, 
         device: &Device, 
         queue: &CommandQueue
     ) -> Self {
@@ -72,6 +72,18 @@ impl MetalAccelerationStructure {
             instance_descriptors,
             instance_buffer
         }
+    }
+
+    pub fn instance(&self) -> &AccelerationStructure {
+        &self.instance
+    }
+
+    pub fn primitive_structures(&self) -> &Vec<AccelerationStructure> {
+        &self.primitive_structures
+    }
+
+    pub fn instance_buffer(&self) -> &Buffer {
+        &self.instance_buffer
     }
 }
 

@@ -44,12 +44,16 @@ impl World {
     }
 
     pub fn get_metal_geometries(&self, device: Device) -> Vec<Box<dyn MetalGeometry>> {
+        let mut geometries: Vec<Box<dyn MetalGeometry>> = Vec::new();
         let quads = self.hittable_root.get_geometries::<Quad>();
         let spheres = self.hittable_root.get_geometries::<Sphere>();
-        vec![
-            Box::new(MetalQuadGeometry::new(device.clone(), quads)),
-            Box::new(MetalSphereGeometry::new(device, spheres))
-        ]
+        if !quads.is_empty() {
+            geometries.push(Box::new(MetalQuadGeometry::new(device.clone(), quads)));
+        }
+        if !spheres.is_empty() {
+            geometries.push(Box::new(MetalSphereGeometry::new(device.clone(), spheres)));
+        }
+        geometries
     }
 }
 

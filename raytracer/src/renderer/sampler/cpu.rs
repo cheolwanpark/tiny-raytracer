@@ -148,7 +148,7 @@ mod tests {
         let receiver_handle = tokio::spawn(async move {
             let mut received = vec![false; num_samples];
             while let Ok(sampled_color) = crx.recv_async().await {
-                received[sampled_color.x] = true;
+                received[sampled_color.x as usize] = true;
             }
             received
         });
@@ -160,7 +160,7 @@ mod tests {
                 let origin = Vec3::new(x, 0.0, 0.0);
                 let ray = Ray::new(origin, Vec3::new(0.0, 0.0, -1.0));
                 SamplePoint {
-                    x: i,
+                    x: i as u32,
                     y: 0,
                     ray,
                 }

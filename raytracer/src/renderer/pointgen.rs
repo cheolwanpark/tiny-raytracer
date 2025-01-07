@@ -4,9 +4,11 @@ use flume::{bounded, Receiver, Sender};
 
 use crate::{camera::Camera, math::vec3::Vec3, ray::Ray, utils::random::random, Float};
 
+#[repr(C)]
+#[derive(Clone, Copy)]
 pub struct SamplePoint {
-    pub x: usize,
-    pub y: usize,
+    pub x: u32,
+    pub y: u32,
     pub ray: Ray,
 }
 
@@ -40,8 +42,8 @@ impl SamplePointGenerator {
                     let v = (y as Float + random::<Float>()) / (self.height - 1) as Float;
                     let ray = self.camera.get_ray(u, v);
                     tx.send_async(SamplePoint {
-                        x, 
-                        y, 
+                        x: x as u32, 
+                        y: y as u32, 
                         ray,
                     }).await.expect(format!("failed to send sample point").as_str());
                 }
@@ -89,7 +91,7 @@ mod tests {
             let mut cnt = vec![vec![0usize; height]; width];
             
             while let Ok(sample) = rx.recv_async().await {
-                cnt[sample.x][sample.y] += 1;
+                cnt[sample.x as usize][sample.y as usize] += 1;
             }
             cnt
         });

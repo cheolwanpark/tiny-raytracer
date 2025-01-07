@@ -1,6 +1,6 @@
-use std::{ops::Range, sync::Arc};
+use std::{ops::{Deref, Range}, sync::Arc};
 
-use as_any::AsAny;
+use as_any::{AsAny, Downcast};
 
 use crate::{ray::Ray, Float};
 
@@ -28,11 +28,14 @@ impl HittableList {
         self.objects.push(Arc::new(object));
     }
     
-    pub fn get_geometries<T: AsAny + Clone>(&self) -> Vec<T> {
-        self.objects.iter()
-                    .filter_map(|obj| obj.as_any().downcast_ref::<T>())
-                    .map(|rf| rf.clone())
-                    .collect()
+    pub fn get_geometries<T: Downcast + Clone>(&self) -> Vec<T> {
+        let mut geometries = Vec::new();
+        for object in &self.objects {
+            if let Some(geometry) = (***object).downcast_ref::<T>() {
+                geometries.push(geometry.clone());
+            }
+        }
+        geometries
     }
 }
 impl Hittable for HittableList {
