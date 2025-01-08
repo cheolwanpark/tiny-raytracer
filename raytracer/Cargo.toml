@@ -11,6 +11,7 @@ as-any = "0.3.1"
 rand = "0.8.5"
 indicatif = "0.17.8"
 flume = "0.11.0"
+ndarray = "0.16.1"
 bytemuck = { version = "1.17.0", features = ["derive"] }
 tokio = { version = "1.39.3", features = ["rt", "rt-multi-thread", "macros", "time"] }
 metal = "0.30.0"

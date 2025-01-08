@@ -1,4 +1,4 @@
-use std::{fmt::Display, ops::{
+use std::{f32::INFINITY, fmt::Display, ops::{
     Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Range, Sub, SubAssign,
 }};
 
@@ -7,7 +7,7 @@ use rand::random;
 use crate::{utils::image::Color, Float, FloatConsts};
 
 #[repr(C)]
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug)]
 pub struct Vec3 {
     pub x: Float,
     pub y: Float,
@@ -30,8 +30,8 @@ impl Vec3 {
     }
 
     pub fn near_zero(&self) -> bool {
-        let s = 1e-8;
-        self.x.abs() < s && self.y.abs() < s && self.z.abs() < s
+        let eps = 1e-7;
+        self.x.abs() < eps && self.y.abs() < eps && self.z.abs() < eps
     }
 
     pub fn length(&self) -> Float {
@@ -183,6 +183,24 @@ impl IndexMut<usize> for Vec3 {
             2 => &mut self.z,
             _ => panic!("out of bounds index"),
         }
+    }
+}
+
+impl PartialEq for Vec3 {
+    fn eq(&self, other: &Self) -> bool {
+        let (mut v1, mut v2) = (*self, *other);
+        for i in 0..3 {
+            if v1[i] == Float::from(INFINITY) && v1[i] == v2[i] {
+                v1[i] = 0.0;
+                v2[i] = 0.0;
+            }
+        }
+        let delta = v1 - v2;
+        delta.near_zero()
+    }
+    
+    fn ne(&self, other: &Self) -> bool {
+        !self.eq(other)
     }
 }
 
