@@ -93,27 +93,27 @@ mod tests {
         world.add_material("left_inner", Box::new(Dielectric::new(Vec3::new_diagonal(1.0), 1.0/1.5)));
         world.add_material("right", Box::new(Metal::new(Vec3::new(0.4, 0.4, 1.0), 0.3)));
 
-        world.add_hittable(Box::new(Sphere::new(
+        world.add_geometry(Box::new(Sphere::new(
             Vec3::new(0.0, -100.5, -1.0),
             100.0,
             world.get_material("ground").unwrap(),
         )));
-        world.add_hittable(Box::new(Sphere::new(
+        world.add_geometry(Box::new(Sphere::new(
             Vec3::new(0.0, 0.0, -1.2),
             0.5,
             world.get_material("center").unwrap(),
         )));
-        world.add_hittable(Box::new(Sphere::new(
+        world.add_geometry(Box::new(Sphere::new(
             Vec3::new(1.0, 0.0, -1.0),
             0.5,
             world.get_material("left_outer").unwrap(),
         )));
-        world.add_hittable(Box::new(Sphere::new(
+        world.add_geometry(Box::new(Sphere::new(
             Vec3::new(1.0, 0.0, -1.0),
             0.4,
             world.get_material("left_inner").unwrap(),
         )));
-        world.add_hittable(Box::new(Sphere::new(
+        world.add_geometry(Box::new(Sphere::new(
             Vec3::new(-1.0, 0.0, -1.0),
             0.5,
             world.get_material("right").unwrap(),

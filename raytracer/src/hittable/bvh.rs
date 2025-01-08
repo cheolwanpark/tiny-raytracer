@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, ops::Range, sync::Arc};
 
-use crate::{hittable::{list::HittableList, HitRecord, Hittable}, ray::Ray, utils::random::random_range, Float};
+use crate::{hittable::{HitRecord, Hittable}, ray::Ray, utils::random::random_range, Float};
 
 use super::aabb::AABB;
 
@@ -9,7 +9,12 @@ pub struct BVH {
 }
 
 impl BVH {
-    pub fn new_with_mut_slice(objects: &mut [Arc<Box<dyn Hittable>>]) -> Self {
+    pub fn new(list: &Vec<Arc<Box<dyn Hittable>>>) -> Self {
+        let mut objects = list.clone();
+        Self::new_with_mut_slice(&mut objects)
+    }
+
+    fn new_with_mut_slice(objects: &mut [Arc<Box<dyn Hittable>>]) -> Self {
         Self {
             root: Node::new(objects)
         }

@@ -1,6 +1,7 @@
 use super::Material;
 use crate::{hittable::HitRecord, math::vec3::Vec3, utils::random, ray::Ray};
 
+#[derive(Clone)]
 pub struct Lambertian {
     albedo: Vec3,
 }

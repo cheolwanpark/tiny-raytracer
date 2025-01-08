@@ -4,7 +4,6 @@ use as_any::AsAny;
 
 use crate::{material::Material, math::vec3::Vec3, ray::Ray, Float};
 
-pub mod list;
 pub mod world;
 pub mod sphere;
 pub mod quad;

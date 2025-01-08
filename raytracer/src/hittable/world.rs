@@ -1,26 +1,27 @@
 use std::{collections::HashMap, ops::Range, sync::Arc};
 
+use as_any::Downcast;
 use metal::Device;
 
-use crate::{hittable::{list::HittableList, HitRecord, Hittable}, material::Material, ray::Ray, renderer::sampler::metal::geometry::{quad::MetalQuadGeometry, sphere::MetalSphereGeometry, MetalGeometry}, Float};
+use crate::{hittable::{HitRecord, Hittable}, material::Material, ray::Ray, renderer::sampler::metal::geometry::{quad::MetalQuadGeometry, sphere::MetalSphereGeometry, MetalGeometry}, Float};
 
 use super::{aabb::AABB, bvh::BVH, quad::Quad, sphere::Sphere};
 
 pub struct World {
-    hittable_root: HittableList,
+    geometries: Vec<Arc<Box<dyn Hittable>>>,
     materials: HashMap<String, Arc<Box<dyn Material>>>,
 }
 
 impl World {
     pub fn new() -> Self {
         Self {
-            hittable_root: HittableList::new(),
+            geometries: Vec::new(),
             materials: HashMap::new(),
         }
     }
 
-    pub fn add_hittable(&mut self, hittable: Box<dyn Hittable>) {
-        self.hittable_root.push(hittable)
+    pub fn add_geometry(&mut self, geometry: Box<dyn Hittable>) {
+        self.geometries.push(Arc::new(geometry));
     }
 
     pub fn add_material(&mut self, name: &str, material: Box<dyn Material>) {
@@ -40,13 +41,33 @@ impl World {
     }
 
     pub fn get_bvh(&self) -> BVH {
-        BVH::new(&self.hittable_root)
+        BVH::new(&self.geometries)
+    }
+
+    pub fn get_geometries<T: Downcast + Clone>(&self) -> Vec<T> {
+        let mut geometries = Vec::new();
+        for object in &self.geometries {
+            if let Some(geometry) = (***object).downcast_ref::<T>() {
+                geometries.push(geometry.clone());
+            }
+        }
+        geometries
+    }
+
+    pub fn get_materials<T: Downcast + Clone>(&self) -> Vec<T> {
+        let mut materials = Vec::new();
+        for (_, object) in &self.materials {
+            if let Some(material) = (***object).downcast_ref::<T>() {
+                materials.push(material.clone());
+            }
+        }
+        materials
     }
 
     pub fn get_metal_geometries(&self, device: Device) -> Vec<Box<dyn MetalGeometry>> {
         let mut geometries: Vec<Box<dyn MetalGeometry>> = Vec::new();
-        let quads = self.hittable_root.get_geometries::<Quad>();
-        let spheres = self.hittable_root.get_geometries::<Sphere>();
+        let quads = self.get_geometries::<Quad>();
+        let spheres = self.get_geometries::<Sphere>();
         if !quads.is_empty() {
             geometries.push(Box::new(MetalQuadGeometry::new(device.clone(), quads)));
         }
@@ -54,16 +75,6 @@ impl World {
             geometries.push(Box::new(MetalSphereGeometry::new(device.clone(), spheres)));
         }
         geometries
-    }
-}
-
-impl Hittable for World {
-    fn hit(&self, ray: &Ray, t_range: Range<Float>) -> Option<HitRecord> {
-        self.hittable_root.hit(ray, t_range)
-    }
-
-    fn bounding_box(&self) -> AABB {
-        self.hittable_root.bounding_box()
     }
 }
 

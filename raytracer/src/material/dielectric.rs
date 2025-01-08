@@ -2,6 +2,7 @@ use crate::{hittable::HitRecord, math::vec3::Vec3, utils::random::random, ray::R
 
 use super::Material;
 
+#[derive(Clone)]
 pub struct Dielectric {
     albedo: Vec3,
     refraction_index: Float,

@@ -2,6 +2,7 @@ use crate::{hittable::HitRecord, math::vec3::Vec3, ray::Ray};
 
 use super::Material;
 
+#[derive(Clone)]
 pub struct Light {
     color: Vec3,
 }

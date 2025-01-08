@@ -106,31 +106,31 @@ mod tests {
         world.add_material("orange", Box::new(Lambertian::new(Vec3::new(1.0, 0.5, 0.0))));
         world.add_material("teal", Box::new(Lambertian::new(Vec3::new(0.2, 0.8, 0.8))));
 
-        world.add_hittable(Box::new(Quad::new(
+        world.add_geometry(Box::new(Quad::new(
             Vec3::new(-3.0, -2.0, 5.0),
             Vec3::new(0.0, 0.0, -4.0),
             Vec3::new(0.0, 4.0, 0.0),
             world.get_material("red").unwrap()
         )));
-        world.add_hittable(Box::new(Quad::new(
+        world.add_geometry(Box::new(Quad::new(
             Vec3::new(-2.0, -2.0, 0.0),
             Vec3::new(4.0, 0.0, 0.0),
             Vec3::new(0.0, 4.0, 0.0),
             world.get_material("green").unwrap()
         )));
-        world.add_hittable(Box::new(Quad::new(
+        world.add_geometry(Box::new(Quad::new(
             Vec3::new(3.0, -2.0, 1.0),
             Vec3::new(0.0, 0.0, 4.0),
             Vec3::new(0.0, 4.0, 0.0),
             world.get_material("blue").unwrap()
         )));
-        world.add_hittable(Box::new(Quad::new(
+        world.add_geometry(Box::new(Quad::new(
             Vec3::new(-2.0, 3.0, 1.0),
             Vec3::new(4.0, 0.0, 0.0),
             Vec3::new(0.0, 0.0, 4.0),
             world.get_material("orange").unwrap()
         )));
-        world.add_hittable(Box::new(Quad::new(
+        world.add_geometry(Box::new(Quad::new(
             Vec3::new(-2.0, -3.0, 5.0),
             Vec3::new(4.0, 0.0, 0.0),
             Vec3::new(0.0, 0.0, -4.0),

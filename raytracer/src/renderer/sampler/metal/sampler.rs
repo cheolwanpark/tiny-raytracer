@@ -164,27 +164,27 @@ mod tests {
     fn dummy_world() -> World {
         let mut world = World::new();
         world.add_material("dummy", Box::new(Lambertian::new(Vec3::new(1.0, 1.0, 1.0))));
-        world.add_hittable(Box::new(Sphere::new(
+        world.add_geometry(Box::new(Sphere::new(
             Vec3::new(0.0, -100.5, -1.0),
             100.0,
             world.get_material("dummy").unwrap(),
         )));
-        world.add_hittable(Box::new(Sphere::new(
+        world.add_geometry(Box::new(Sphere::new(
             Vec3::new(0.0, 0.0, -1.2),
             0.5,
             world.get_material("dummy").unwrap(),
         )));
-        world.add_hittable(Box::new(Sphere::new(
+        world.add_geometry(Box::new(Sphere::new(
             Vec3::new(1.0, 0.0, -1.0),
             0.5,
             world.get_material("dummy").unwrap(),
         )));
-        world.add_hittable(Box::new(Sphere::new(
+        world.add_geometry(Box::new(Sphere::new(
             Vec3::new(1.0, 0.0, -1.0),
             0.4,
             world.get_material("dummy").unwrap(),
         )));
-        world.add_hittable(Box::new(Sphere::new(
+        world.add_geometry(Box::new(Sphere::new(
             Vec3::new(-1.0, 0.0, -1.0),
             0.5,
             world.get_material("dummy").unwrap(),

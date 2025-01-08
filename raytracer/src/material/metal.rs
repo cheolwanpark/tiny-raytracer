@@ -2,6 +2,7 @@ use crate::{hittable::HitRecord, math::vec3::Vec3, ray::Ray, Float};
 
 use super::Material;
 
+#[derive(Clone)]
 pub struct Metal {
     albedo: Vec3,
     fuzz: Float,

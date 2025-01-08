@@ -27,48 +27,48 @@ fn build_world() -> World {
 }
 
 fn build_objects(mut world: World) -> World {
-    world.add_hittable(Box::new(Quad::new(
+    world.add_geometry(Box::new(Quad::new(
         Vec3::new(100.0, 0.0, 0.0),
         Vec3::new(0.0, 100.0, 0.0),
         Vec3::new(0.0, 0.0, 100.0),
         world.get_material("green").unwrap()
     )));
-    world.add_hittable(Box::new(Quad::new(
+    world.add_geometry(Box::new(Quad::new(
         Vec3::new(0.0, 0.0, 0.0),
         Vec3::new(0.0, 100.0, 0.0),
         Vec3::new(0.0, 0.0, 100.0),
         world.get_material("red").unwrap()
     )));
-    world.add_hittable(Box::new(Quad::new(
+    world.add_geometry(Box::new(Quad::new(
         Vec3::new(65.0, 100.0, 60.0),
         Vec3::new(-30.0, 0.0, 0.0),
         Vec3::new(0.0, 0.0, -20.0),
         world.get_material("light").unwrap()
     )));
-    world.add_hittable(Box::new(Quad::new(
+    world.add_geometry(Box::new(Quad::new(
         Vec3::new(0.0, 0.0, 0.0),
         Vec3::new(100.0, 0.0, 0.0),
         Vec3::new(0.0, 0.0, 100.0),
         world.get_material("white").unwrap()
     )));
-    world.add_hittable(Box::new(Quad::new(
+    world.add_geometry(Box::new(Quad::new(
         Vec3::new(100.0, 100.0, 100.0),
         Vec3::new(-100.0, 0.0, 0.0),
         Vec3::new(0.0, 0.0, -100.0),
         world.get_material("white").unwrap()
     )));
-    world.add_hittable(Box::new(Quad::new(
+    world.add_geometry(Box::new(Quad::new(
         Vec3::new(0.0, 0.0, 100.0),
         Vec3::new(100.0, 0.0, 0.0),
         Vec3::new(0.0, 100.0, 0.0),
         world.get_material("white").unwrap()
     )));
-    world.add_hittable(Box::new(new_box(
+    world.add_geometry(Box::new(new_box(
         Vec3::new(25.0, 0.0, 50.0),
         Vec3::new(55.0, 60.0, 80.0),
         world.get_material("white").unwrap()
     )));
-    world.add_hittable(Box::new(new_box(
+    world.add_geometry(Box::new(new_box(
         Vec3::new(45.0, 0.0, 10.0),
         Vec3::new(75.0, 30.0, 40.0),
         world.get_material("white").unwrap()
